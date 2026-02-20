@@ -64,7 +64,8 @@
               "buildTarget": "admin_app:build:production"
             },
             "development": {
-              "buildTarget": "admin_app:build:development"
+              "buildTarget": "admin_app:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

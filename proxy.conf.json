@@ -1,0 +1,14 @@
+{
+  "/auth": {
+    "target": "https://recipeappbe-production-4692.up.railway.app",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/admin": {
+    "target": "https://recipeappbe-production-4692.up.railway.app",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
