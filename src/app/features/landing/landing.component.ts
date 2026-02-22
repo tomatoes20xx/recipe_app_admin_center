@@ -1,4 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
+
+interface ScreenShot {
+  src: string;
+  label: string;
+}
 
 @Component({
   selector: 'app-landing',
@@ -46,7 +51,7 @@ import { Component } from '@angular/core';
         </div>
       </div>
 
-      <!-- Hero phones: light theme front, dark theme back -->
+      <!-- Hero: two phones side-by-side, back phone clearly visible -->
       <div class="hero-visual">
         <div class="phone-stack">
           <div class="phone phone-back">
@@ -63,47 +68,37 @@ import { Component } from '@angular/core';
     <section class="screens-section">
       <div class="section-inner">
         <h2 class="section-title">A beautiful experience on every screen</h2>
-        <p class="section-sub">Designed with simplicity in mind so the food always takes centre stage.</p>
+        <p class="section-sub">Tap any screenshot to expand it.</p>
       </div>
       <div class="screens-scroll">
-        <div class="screen-item">
-          <div class="phone-frame">
-            <img src="/screenshots/feed_light_theme.png" alt="Feed" class="phone-img" />
+        @for (shot of screenshots; track shot.src) {
+          <div class="screen-item" (click)="open(shot)">
+            <div class="phone-frame">
+              <img [src]="shot.src" [alt]="shot.label" class="phone-img" />
+              <div class="expand-hint">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M15 3h6v6h-2V5h-4V3zM9 3H3v6h2V5h4V3zM15 21h4v-4h2v6h-6v-2zM3 21h6v-2H5v-4H3v6z"/></svg>
+              </div>
+            </div>
+            <p class="screen-label">{{ shot.label }}</p>
           </div>
-          <p class="screen-label">Feed &amp; Discovery</p>
-        </div>
-        <div class="screen-item screen-item-featured">
-          <div class="phone-frame">
-            <img src="/screenshots/full_screen_feed.png" alt="Immersive mode" class="phone-img" />
-          </div>
-          <p class="screen-label">Immersive Mode</p>
-        </div>
-        <div class="screen-item">
-          <div class="phone-frame">
-            <img src="/screenshots/recipe_search_with_what_i_have.png" alt="Cook with what you have" class="phone-img" />
-          </div>
-          <p class="screen-label">Cook with What You Have</p>
-        </div>
-        <div class="screen-item">
-          <div class="phone-frame">
-            <img src="/screenshots/create_recipe.png" alt="Create recipe" class="phone-img" />
-          </div>
-          <p class="screen-label">Recipe Creation</p>
-        </div>
-        <div class="screen-item">
-          <div class="phone-frame">
-            <img src="/screenshots/shopping_list.png" alt="Shopping list" class="phone-img" />
-          </div>
-          <p class="screen-label">Shopping List</p>
-        </div>
-        <div class="screen-item">
-          <div class="phone-frame">
-            <img src="/screenshots/feed_dark_theme.png" alt="Dark theme" class="phone-img" />
-          </div>
-          <p class="screen-label">Dark Theme</p>
-        </div>
+        }
       </div>
     </section>
+
+    <!-- LIGHTBOX -->
+    @if (selected()) {
+      <div class="lightbox-overlay" (click)="close()">
+        <div class="lightbox-content" (click)="$event.stopPropagation()">
+          <button class="lightbox-close" (click)="close()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          </button>
+          <div class="lightbox-phone">
+            <img [src]="selected()!.src" [alt]="selected()!.label" class="lightbox-img" />
+          </div>
+          <p class="lightbox-label">{{ selected()!.label }}</p>
+        </div>
+      </div>
+    }
 
     <!-- FEATURES GRID -->
     <section class="features">
@@ -305,25 +300,30 @@ import { Component } from '@angular/core';
 
     /* ─── PHONE STACK (HERO) ──────────────── */
     .hero-visual { flex: 0 0 auto; }
-    .phone-stack { position: relative; width: 300px; height: 560px; }
+
+    /* Wider stack so both phones are clearly visible */
+    .phone-stack { position: relative; width: 420px; height: 560px; }
+
     .phone {
       position: absolute;
       background: #111;
       border-radius: 40px;
       padding: 10px;
-      box-shadow: 0 30px 70px rgba(0,0,0,0.25);
       overflow: hidden;
     }
+    /* Back phone: left side, slightly rotated, clearly peeking out */
     .phone-back {
-      width: 240px; height: 490px;
-      top: 0; left: 0;
-      transform: rotate(-7deg);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+      width: 230px; height: 480px;
+      top: 20px; left: 0;
+      transform: rotate(-6deg);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.18);
       z-index: 1;
     }
+    /* Front phone: right side, straight */
     .phone-front {
-      width: 252px; height: 510px;
+      width: 240px; height: 500px;
       bottom: 0; right: 0;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.28);
       z-index: 2;
     }
     .phone-img {
@@ -336,8 +336,8 @@ import { Component } from '@angular/core';
     .screens-section .section-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
     .screens-scroll {
       display: flex;
-      gap: 20px;
-      padding: 40px 40px 20px;
+      gap: 28px;
+      padding: 40px 48px 32px;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
@@ -346,31 +346,91 @@ import { Component } from '@angular/core';
       flex-wrap: wrap;
     }
     .screens-scroll::-webkit-scrollbar { display: none; }
+
     .screen-item {
       flex: 0 0 auto;
       text-align: center;
       scroll-snap-align: center;
-    }
-    .screen-item-featured .phone-frame {
-      box-shadow: 0 24px 60px rgba(83,177,117,0.25);
-      transform: scale(1.06);
-      margin-bottom: 6px;
+      cursor: pointer;
     }
     .phone-frame {
-      width: 180px;
+      position: relative;
+      width: 240px;
       background: #111;
-      border-radius: 32px;
-      padding: 8px;
-      box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+      border-radius: 36px;
+      padding: 10px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.22);
       overflow: hidden;
-      transition: transform 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-    .phone-frame:hover { transform: translateY(-4px); }
-    .screen-item-featured .phone-frame:hover { transform: scale(1.06) translateY(-4px); }
-    .phone-frame .phone-img { border-radius: 26px; aspect-ratio: 9/19.5; object-fit: cover; }
+    .screen-item:hover .phone-frame {
+      transform: translateY(-6px);
+      box-shadow: 0 28px 60px rgba(0,0,0,0.28);
+    }
+    .phone-frame .phone-img {
+      border-radius: 28px;
+      aspect-ratio: 9/19.5;
+      object-fit: cover;
+      display: block;
+      width: 100%;
+    }
+    .expand-hint {
+      position: absolute; bottom: 18px; right: 18px;
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .screen-item:hover .expand-hint { opacity: 1; }
     .screen-label {
-      margin-top: 14px;
-      font-size: 13px; font-weight: 500; color: #666;
+      margin-top: 16px;
+      font-size: 14px; font-weight: 500; color: #555;
+    }
+
+    /* ─── LIGHTBOX ────────────────────────── */
+    .lightbox-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.85);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .lightbox-content {
+      position: relative;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      animation: scaleIn 0.2s ease;
+    }
+    @keyframes scaleIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .lightbox-close {
+      position: absolute; top: -16px; right: -16px;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #fff; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 10;
+      transition: background 0.15s;
+    }
+    .lightbox-close:hover { background: #f0f0f0; }
+    .lightbox-phone {
+      background: #111;
+      border-radius: 44px;
+      padding: 12px;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+      overflow: hidden;
+      max-height: 85vh;
+    }
+    .lightbox-img {
+      display: block;
+      border-radius: 34px;
+      max-height: calc(85vh - 24px);
+      width: auto;
+      max-width: min(360px, 80vw);
+      object-fit: contain;
+    }
+    .lightbox-label {
+      color: #fff; font-size: 15px; font-weight: 500;
+      text-align: center; opacity: 0.85;
     }
 
     /* ─── FEATURES ────────────────────────── */
@@ -448,24 +508,39 @@ import { Component } from '@angular/core';
     .footer-copy { font-size: 13px; color: #555; }
 
     /* ─── RESPONSIVE ──────────────────────── */
-    @media (max-width: 860px) {
+    @media (max-width: 960px) {
       .hero { flex-direction: column; text-align: center; padding: 48px 24px; gap: 48px; }
       .hero-sub { margin: 0 auto 24px; }
       .hero-tags { justify-content: center; }
       .hero-actions { justify-content: center; }
       .hero-visual { order: -1; }
-      .phone-stack { width: 240px; height: 440px; }
-      .phone-back { width: 190px; height: 380px; }
-      .phone-front { width: 200px; height: 400px; }
+      .phone-stack { width: 320px; height: 440px; }
+      .phone-back { width: 180px; height: 370px; top: 10px; left: 0; }
+      .phone-front { width: 190px; height: 390px; }
       .features-grid { grid-template-columns: 1fr 1fr; }
       .screens-scroll { flex-wrap: nowrap; justify-content: flex-start; }
     }
 
     @media (max-width: 560px) {
+      .phone-frame { width: 200px; }
       .features-grid { grid-template-columns: 1fr; }
       .steps-row { flex-direction: column; align-items: center; }
       .step-arrow { transform: rotate(90deg); }
     }
   `],
 })
-export class LandingComponent {}
+export class LandingComponent {
+  readonly screenshots: ScreenShot[] = [
+    { src: '/screenshots/feed_light_theme.png',               label: 'Feed & Discovery' },
+    { src: '/screenshots/full_screen_feed.png',               label: 'Immersive Mode' },
+    { src: '/screenshots/recipe_search_with_what_i_have.png', label: 'Cook with What You Have' },
+    { src: '/screenshots/create_recipe.png',                  label: 'Recipe Creation' },
+    { src: '/screenshots/shopping_list.png',                  label: 'Shopping List' },
+    { src: '/screenshots/feed_dark_theme.png',                label: 'Dark Theme' },
+  ];
+
+  selected = signal<ScreenShot | null>(null);
+
+  open(shot: ScreenShot) { this.selected.set(shot); }
+  close()               { this.selected.set(null); }
+}
