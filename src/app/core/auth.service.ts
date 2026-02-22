@@ -33,6 +33,6 @@ export class AuthService {
   logout() {
     this._token.set(null);
     localStorage.removeItem(TOKEN_KEY);
-    this.router.navigate(['/login']);
+    this.router.navigate(['/admin/login']);
   }
 }

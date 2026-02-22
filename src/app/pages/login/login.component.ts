@@ -141,7 +141,7 @@ export class LoginComponent {
     const { email, password } = this.form.value;
 
     this.auth.login(email!, password!).subscribe({
-      next: () => this.router.navigate(['/reports']),
+      next: () => this.router.navigate(['/admin/reports']),
       error: (err) => {
         this.loading.set(false);
         console.error('Login error:', err);

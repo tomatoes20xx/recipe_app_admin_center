@@ -29,15 +29,15 @@ import { AuthService } from '../core/auth.service';
         </div>
 
         <mat-nav-list>
-          <a mat-list-item routerLink="/reports" routerLinkActive="active-link">
+          <a mat-list-item routerLink="/admin/reports" routerLinkActive="active-link">
             <mat-icon matListItemIcon>flag</mat-icon>
             <span matListItemTitle>Reports</span>
           </a>
-          <a mat-list-item routerLink="/users" routerLinkActive="active-link">
+          <a mat-list-item routerLink="/admin/users" routerLinkActive="active-link">
             <mat-icon matListItemIcon>people</mat-icon>
             <span matListItemTitle>Users</span>
           </a>
-          <a mat-list-item routerLink="/content" routerLinkActive="active-link">
+          <a mat-list-item routerLink="/admin/content" routerLinkActive="active-link">
             <mat-icon matListItemIcon>restore</mat-icon>
             <span matListItemTitle>Content</span>
           </a>
