@@ -76,7 +76,7 @@ import { AuthService } from '../core/auth.service';
     }
 
     .logo-icon { color: #53B175; font-size: 28px; width: 28px; height: 28px; }
-    .logo-text { font-size: 16px; font-weight: 600; }
+    .logo-text { font-size: 16px; font-weight: 600; color: black }
 
     mat-nav-list { flex: 1; padding-top: 8px; }
 
