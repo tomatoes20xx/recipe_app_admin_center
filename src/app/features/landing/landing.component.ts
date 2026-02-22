@@ -9,7 +9,7 @@ import { Component } from '@angular/core';
     <nav class="nav">
       <div class="nav-inner">
         <div class="nav-logo">
-          <span class="logo-icon">🍅</span>
+          <img src="/app_icon.png" class="nav-icon" alt="Yummy" />
           <span class="logo-text">Yummy</span>
         </div>
         <div class="nav-badges">
@@ -36,64 +36,71 @@ import { Component } from '@angular/core';
         </div>
         <div class="hero-actions">
           <a class="btn-primary" href="#">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.42c1.4.07 2.38.74 3.2.8 1.23-.24 2.4-.93 3.65-.84 1.55.13 2.72.74 3.47 1.9-3.14 1.93-2.4 6.13.68 7.34-.55 1.32-1.25 2.6-3 3.66zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.42c1.4.07 2.38.74 3.2.8 1.23-.24 2.4-.93 3.65-.84 1.55.13 2.72.74 3.47 1.9-3.14 1.93-2.4 6.13.68 7.34-.55 1.32-1.25 2.6-3 3.66zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
             App Store
           </a>
           <a class="btn-primary btn-android" href="#">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5S11 23.33 11 22.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48A5.84 5.84 0 0 0 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31A5.983 5.983 0 0 0 6 7h12a5.98 5.98 0 0 0-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5S11 23.33 11 22.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48A5.84 5.84 0 0 0 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31A5.983 5.983 0 0 0 6 7h12a5.98 5.98 0 0 0-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/></svg>
             Google Play
           </a>
         </div>
       </div>
+
+      <!-- Hero phones: light theme front, dark theme back -->
       <div class="hero-visual">
         <div class="phone-stack">
           <div class="phone phone-back">
-            <div class="phone-screen screen-back">
-              <div class="screen-header">
-                <span class="screen-tab active-tab">Global</span>
-                <span class="screen-tab">Following</span>
-                <span class="screen-tab">Trending</span>
-              </div>
-              <div class="recipe-card-mockup">
-                <div class="recipe-img" style="background: linear-gradient(135deg,#f6d365,#fda085)"></div>
-                <div class="recipe-body">
-                  <div class="recipe-name">Georgian Khachapuri</div>
-                  <div class="recipe-meta">⏱ 45 min &nbsp;·&nbsp; ⭐ 4.9</div>
-                  <div class="recipe-actions-row">
-                    <span class="action-chip">❤️ 248</span>
-                    <span class="action-chip">💬 31</span>
-                    <span class="action-chip">🔖</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <img src="/screenshots/feed_dark_theme.png" alt="Yummy dark theme" class="phone-img" />
           </div>
           <div class="phone phone-front">
-            <div class="phone-screen screen-front">
-              <div class="detail-img" style="background: linear-gradient(160deg,#53B175 0%,#3d9459 100%)">
-                <div class="detail-overlay">
-                  <div class="detail-title">Adjaruli Khachapuri</div>
-                  <div class="detail-author">by @nino.k</div>
-                </div>
-              </div>
-              <div class="detail-content">
-                <div class="detail-chips">
-                  <span class="d-chip">Georgian</span>
-                  <span class="d-chip">Bread</span>
-                  <span class="d-chip">Easy</span>
-                </div>
-                <div class="detail-row">
-                  <div class="detail-stat"><div class="stat-val">35</div><div class="stat-lbl">min</div></div>
-                  <div class="detail-stat"><div class="stat-val">4</div><div class="stat-lbl">servings</div></div>
-                  <div class="detail-stat"><div class="stat-val">Easy</div><div class="stat-lbl">level</div></div>
-                </div>
-                <div class="detail-section-title">Ingredients</div>
-                <div class="ing-line"></div>
-                <div class="ing-line short"></div>
-                <div class="ing-line medium"></div>
-              </div>
-            </div>
+            <img src="/screenshots/feed_light_theme.png" alt="Yummy light theme" class="phone-img" />
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREENSHOTS STRIP -->
+    <section class="screens-section">
+      <div class="section-inner">
+        <h2 class="section-title">A beautiful experience on every screen</h2>
+        <p class="section-sub">Designed with simplicity in mind so the food always takes centre stage.</p>
+      </div>
+      <div class="screens-scroll">
+        <div class="screen-item">
+          <div class="phone-frame">
+            <img src="/screenshots/feed_light_theme.png" alt="Feed" class="phone-img" />
+          </div>
+          <p class="screen-label">Feed &amp; Discovery</p>
+        </div>
+        <div class="screen-item screen-item-featured">
+          <div class="phone-frame">
+            <img src="/screenshots/full_screen_feed.png" alt="Immersive mode" class="phone-img" />
+          </div>
+          <p class="screen-label">Immersive Mode</p>
+        </div>
+        <div class="screen-item">
+          <div class="phone-frame">
+            <img src="/screenshots/recipe_search_with_what_i_have.png" alt="Cook with what you have" class="phone-img" />
+          </div>
+          <p class="screen-label">Cook with What You Have</p>
+        </div>
+        <div class="screen-item">
+          <div class="phone-frame">
+            <img src="/screenshots/create_recipe.png" alt="Create recipe" class="phone-img" />
+          </div>
+          <p class="screen-label">Recipe Creation</p>
+        </div>
+        <div class="screen-item">
+          <div class="phone-frame">
+            <img src="/screenshots/shopping_list.png" alt="Shopping list" class="phone-img" />
+          </div>
+          <p class="screen-label">Shopping List</p>
+        </div>
+        <div class="screen-item">
+          <div class="phone-frame">
+            <img src="/screenshots/feed_dark_theme.png" alt="Dark theme" class="phone-img" />
+          </div>
+          <p class="screen-label">Dark Theme</p>
         </div>
       </div>
     </section>
@@ -108,13 +115,13 @@ import { Component } from '@angular/core';
           <div class="feature-card feature-large">
             <div class="feature-icon">📱</div>
             <h3>Feed &amp; Discovery</h3>
-            <p>Browse a global recipe feed or filter to people you follow. Sort by popularity or what's trending. Switch between a scrollable card view and a full-screen immersive mode — similar to short-video apps.</p>
+            <p>Browse a global recipe feed or filter to people you follow. Sort by popularity or what's trending. Switch between a scrollable card view and a full-screen immersive mode.</p>
           </div>
 
           <div class="feature-card feature-large">
             <div class="feature-icon">🧑‍🍳</div>
             <h3>Cook with What You Have</h3>
-            <p>Enter the ingredients you already have at home and get back recipes you can actually make. Results are ranked by ingredient match — see perfect matches and near-matches that only need one or two extras.</p>
+            <p>Enter the ingredients you already have at home and get back recipes you can actually make. Results are ranked by ingredient match — see perfect matches and near-matches.</p>
           </div>
 
           <div class="feature-card">
@@ -126,13 +133,13 @@ import { Component } from '@angular/core';
           <div class="feature-card">
             <div class="feature-icon">🔍</div>
             <h3>Rich Search &amp; Filters</h3>
-            <p>Find recipes by keyword, cuisine, tags, cooking time, difficulty level, or specific ingredients — filters can be combined.</p>
+            <p>Find recipes by keyword, cuisine, tags, cooking time, difficulty, or specific ingredients — all combinable.</p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon">👥</div>
             <h3>Social Graph</h3>
-            <p>Follow cooks you love. See their profiles, follower counts, and recipe grids. Discover new creators through the community.</p>
+            <p>Follow cooks you love. See their profiles, follower counts, and recipe grids. Discover new creators.</p>
           </div>
 
           <div class="feature-card">
@@ -156,7 +163,7 @@ import { Component } from '@angular/core';
           <div class="feature-card">
             <div class="feature-icon">🔔</div>
             <h3>Real-time Notifications</h3>
-            <p>Get notified about new followers, likes, comments, bookmarks, and shared content — with badge counts on the nav bar.</p>
+            <p>Get notified about new followers, likes, comments, bookmarks, and shared content with badge counts.</p>
           </div>
 
         </div>
@@ -190,23 +197,27 @@ import { Component } from '@angular/core';
       </div>
     </section>
 
-    <!-- PLATFORM & LANGUAGE -->
+    <!-- PLATFORM -->
     <section class="platform">
-      <div class="section-inner platform-inner">
-        <div class="platform-card">
-          <div class="platform-icon">🌍</div>
-          <h3>Two languages, one community</h3>
-          <p>Yummy is fully available in <strong>English</strong> and <strong>Georgian (ქართული)</strong>. Switch languages anytime from settings — every screen, every label, fully translated.</p>
-        </div>
-        <div class="platform-card">
-          <div class="platform-icon">🌙</div>
-          <h3>Light, dark, and system theme</h3>
-          <p>Choose your preferred appearance or let the app follow your device setting automatically. Designed to look great in any mode.</p>
-        </div>
-        <div class="platform-card">
-          <div class="platform-icon">📲</div>
-          <h3>Android &amp; iOS</h3>
-          <p>Built with Flutter for a native-quality experience on both platforms. One codebase, zero compromises on performance or feel.</p>
+      <div class="section-inner">
+        <h2 class="section-title">Made for everyone</h2>
+        <p class="section-sub">Thoughtfully designed, widely accessible.</p>
+        <div class="platform-inner">
+          <div class="platform-card">
+            <div class="platform-icon">🌍</div>
+            <h3>Two languages, one community</h3>
+            <p>Fully available in <strong>English</strong> and <strong>Georgian (ქართული)</strong>. Switch anytime from settings.</p>
+          </div>
+          <div class="platform-card">
+            <div class="platform-icon">🌙</div>
+            <h3>Light, dark &amp; system theme</h3>
+            <p>Choose your preferred appearance or let the app follow your device setting automatically.</p>
+          </div>
+          <div class="platform-card">
+            <div class="platform-icon">📲</div>
+            <h3>Android &amp; iOS</h3>
+            <p>Built with Flutter for a native-quality experience on both platforms. One codebase, zero compromises.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -215,7 +226,7 @@ import { Component } from '@angular/core';
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-logo">
-          <span class="logo-icon">🍅</span>
+          <img src="/app_icon.png" class="footer-icon" alt="Yummy" />
           <span class="logo-text">Yummy</span>
         </div>
         <p class="footer-copy">&copy; 2025 Yummy. All rights reserved.</p>
@@ -244,8 +255,8 @@ import { Component } from '@angular/core';
       padding: 0 24px; height: 64px;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .nav-logo { display: flex; align-items: center; gap: 8px; }
-    .logo-icon { font-size: 26px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; }
+    .nav-icon { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; }
     .logo-text { font-size: 20px; font-weight: 700; color: #53B175; letter-spacing: -0.3px; }
     .nav-badges { display: flex; gap: 8px; }
     .platform-badge {
@@ -292,73 +303,78 @@ import { Component } from '@angular/core';
     .btn-android { background: #53B175; }
     .btn-android:hover { background: #3d9459; }
 
-    /* ─── PHONE STACK ─────────────────────── */
+    /* ─── PHONE STACK (HERO) ──────────────── */
     .hero-visual { flex: 0 0 auto; }
-    .phone-stack { position: relative; width: 280px; height: 520px; }
-
+    .phone-stack { position: relative; width: 300px; height: 560px; }
     .phone {
       position: absolute;
       background: #111;
-      border-radius: 36px;
-      padding: 14px;
-      box-shadow: 0 30px 70px rgba(0,0,0,0.22);
+      border-radius: 40px;
+      padding: 10px;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.25);
+      overflow: hidden;
     }
     .phone-back {
-      width: 240px; height: 460px;
+      width: 240px; height: 490px;
       top: 0; left: 0;
-      transform: rotate(-6deg);
+      transform: rotate(-7deg);
       box-shadow: 0 20px 50px rgba(0,0,0,0.15);
       z-index: 1;
     }
     .phone-front {
-      width: 250px; height: 490px;
+      width: 252px; height: 510px;
       bottom: 0; right: 0;
       z-index: 2;
     }
-    .phone-screen {
-      background: #fafafa; border-radius: 24px;
-      height: 100%; overflow: hidden;
+    .phone-img {
+      width: 100%; height: 100%;
+      object-fit: cover; border-radius: 32px; display: block;
     }
 
-    /* Back phone — feed */
-    .screen-back { padding: 12px; }
-    .screen-header { display: flex; gap: 8px; margin-bottom: 14px; }
-    .screen-tab { font-size: 11px; font-weight: 600; color: #aaa; }
-    .active-tab { color: #53B175; border-bottom: 2px solid #53B175; padding-bottom: 2px; }
-    .recipe-card-mockup { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-    .recipe-img { height: 100px; }
-    .recipe-body { padding: 10px; }
-    .recipe-name { font-size: 12px; font-weight: 700; color: #111; margin-bottom: 4px; }
-    .recipe-meta { font-size: 10px; color: #888; margin-bottom: 8px; }
-    .recipe-actions-row { display: flex; gap: 6px; }
-    .action-chip { font-size: 10px; background: #f5f5f5; padding: 3px 7px; border-radius: 8px; color: #555; }
-
-    /* Front phone — recipe detail */
-    .screen-front { background: #fff; }
-    .detail-img { height: 160px; position: relative; }
-    .detail-overlay {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 12px; background: linear-gradient(transparent, rgba(0,0,0,0.6));
+    /* ─── SCREENSHOTS STRIP ───────────────── */
+    .screens-section { padding: 90px 0; background: #f9fbf9; overflow: hidden; }
+    .screens-section .section-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .screens-scroll {
+      display: flex;
+      gap: 20px;
+      padding: 40px 40px 20px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      justify-content: center;
+      flex-wrap: wrap;
     }
-    .detail-title { font-size: 13px; font-weight: 700; color: #fff; }
-    .detail-author { font-size: 10px; color: rgba(255,255,255,0.8); }
-    .detail-content { padding: 12px; }
-    .detail-chips { display: flex; gap: 6px; margin-bottom: 12px; }
-    .d-chip { font-size: 10px; background: #e8f5ee; color: #53B175; padding: 3px 8px; border-radius: 8px; font-weight: 600; }
-    .detail-row { display: flex; gap: 8px; margin-bottom: 14px; }
-    .detail-stat {
-      flex: 1; background: #f9f9f9; border-radius: 10px;
-      padding: 8px 4px; text-align: center;
+    .screens-scroll::-webkit-scrollbar { display: none; }
+    .screen-item {
+      flex: 0 0 auto;
+      text-align: center;
+      scroll-snap-align: center;
     }
-    .stat-val { font-size: 13px; font-weight: 700; color: #111; }
-    .stat-lbl { font-size: 9px; color: #888; }
-    .detail-section-title { font-size: 11px; font-weight: 700; color: #111; margin-bottom: 8px; }
-    .ing-line { height: 7px; background: #eee; border-radius: 4px; margin-bottom: 6px; width: 90%; }
-    .ing-line.short { width: 55%; }
-    .ing-line.medium { width: 72%; }
+    .screen-item-featured .phone-frame {
+      box-shadow: 0 24px 60px rgba(83,177,117,0.25);
+      transform: scale(1.06);
+      margin-bottom: 6px;
+    }
+    .phone-frame {
+      width: 180px;
+      background: #111;
+      border-radius: 32px;
+      padding: 8px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .phone-frame:hover { transform: translateY(-4px); }
+    .screen-item-featured .phone-frame:hover { transform: scale(1.06) translateY(-4px); }
+    .phone-frame .phone-img { border-radius: 26px; aspect-ratio: 9/19.5; object-fit: cover; }
+    .screen-label {
+      margin-top: 14px;
+      font-size: 13px; font-weight: 500; color: #666;
+    }
 
     /* ─── FEATURES ────────────────────────── */
-    .features { background: #f9fbf9; padding: 90px 24px; }
+    .features { padding: 90px 24px; background: #fff; }
     .section-inner { max-width: 1100px; margin: 0 auto; }
     .section-title {
       font-size: clamp(26px, 4vw, 38px); font-weight: 800;
@@ -368,22 +384,20 @@ import { Component } from '@angular/core';
     .features-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: auto;
       gap: 20px;
     }
     .feature-card {
-      background: #fff; border-radius: 16px; padding: 28px;
+      background: #f9fbf9; border-radius: 16px; padding: 28px;
       border: 1px solid #eee;
       transition: box-shadow 0.2s, transform 0.2s;
     }
     .feature-card:hover { box-shadow: 0 8px 32px rgba(83,177,117,0.12); transform: translateY(-2px); }
-    .feature-large { grid-column: span 1; }
     .feature-icon { font-size: 30px; margin-bottom: 14px; }
     .feature-card h3 { font-size: 16px; font-weight: 700; color: #111; margin-bottom: 8px; }
     .feature-card p { font-size: 14px; line-height: 1.65; color: #666; }
 
     /* ─── HOW IT WORKS ────────────────────── */
-    .how { padding: 90px 24px; background: #fff; }
+    .how { padding: 90px 24px; background: #f9fbf9; }
     .steps-row {
       display: flex; align-items: flex-start;
       justify-content: center; gap: 8px; flex-wrap: wrap;
@@ -410,8 +424,7 @@ import { Component } from '@angular/core';
     .platform-inner {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 24px;
-      margin-top: 52px !important;
+      gap: 24px; margin-top: 52px;
     }
     .platform-card {
       background: #1a1a1a; border-radius: 16px; padding: 28px;
@@ -429,7 +442,8 @@ import { Component } from '@angular/core';
       display: flex; align-items: center; justify-content: space-between;
       flex-wrap: wrap; gap: 16px;
     }
-    .footer-logo { display: flex; align-items: center; gap: 8px; }
+    .footer-logo { display: flex; align-items: center; gap: 10px; }
+    .footer-icon { width: 28px; height: 28px; border-radius: 6px; object-fit: cover; }
     .footer-logo .logo-text { color: #53B175; }
     .footer-copy { font-size: 13px; color: #555; }
 
@@ -440,10 +454,11 @@ import { Component } from '@angular/core';
       .hero-tags { justify-content: center; }
       .hero-actions { justify-content: center; }
       .hero-visual { order: -1; }
-      .phone-stack { width: 220px; height: 400px; }
-      .phone-back { width: 190px; height: 360px; }
-      .phone-front { width: 200px; height: 390px; }
+      .phone-stack { width: 240px; height: 440px; }
+      .phone-back { width: 190px; height: 380px; }
+      .phone-front { width: 200px; height: 400px; }
       .features-grid { grid-template-columns: 1fr 1fr; }
+      .screens-scroll { flex-wrap: nowrap; justify-content: flex-start; }
     }
 
     @media (max-width: 560px) {
