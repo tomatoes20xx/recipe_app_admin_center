@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import {
+  AnalyticsEventsResponse,
+  AnalyticsStats,
   BanRequest,
   HiddenCommentsResponse,
   HiddenRecipesResponse,
@@ -63,5 +65,20 @@ export class ApiService {
 
   restoreComment(commentId: string) {
     return this.http.post<void>(`${this.base}/comments/${commentId}/restore`, {});
+  }
+
+  // ── Analytics ───────────────────────────────────────────────────────────────
+
+  getAnalyticsStats() {
+    return this.http.get<AnalyticsStats>(`${this.base}/analytics/stats`);
+  }
+
+  getAnalyticsEvents(params: { limit?: number; cursor?: string; event_type?: string; recipe_id?: string; user_id?: string }) {
+    let p = new HttpParams().set('limit', params.limit ?? 50);
+    if (params.cursor) p = p.set('cursor', params.cursor);
+    if (params.event_type) p = p.set('event_type', params.event_type);
+    if (params.recipe_id) p = p.set('recipe_id', params.recipe_id);
+    if (params.user_id) p = p.set('user_id', params.user_id);
+    return this.http.get<AnalyticsEventsResponse>(`${this.base}/analytics/events`, { params: p });
   }
 }

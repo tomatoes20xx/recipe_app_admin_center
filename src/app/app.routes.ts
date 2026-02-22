@@ -35,6 +35,12 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/content/content.component').then((m) => m.ContentComponent),
           },
+          {
+            path: 'analytics',
+            title: 'Analytics · Yummy Admin',
+            loadComponent: () =>
+              import('./features/analytics/analytics.component').then((m) => m.AnalyticsComponent),
+          },
         ],
       },
     ],

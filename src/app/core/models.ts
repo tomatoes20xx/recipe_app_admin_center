@@ -77,3 +77,63 @@ export interface HiddenCommentsResponse {
   comments: HiddenComment[];
   next_cursor: string | null;
 }
+
+// ── Analytics ─────────────────────────────────────────────────────────────────
+export interface AnalyticsOverall {
+  total_events: number;
+  unique_users: number;
+  unique_recipes: number;
+  events_last_24h: number;
+  events_last_7d: number;
+  events_last_30d: number;
+}
+
+export interface AnalyticsByType {
+  event_type: string;
+  total: number;
+  last_24h: number;
+  last_7d: number;
+}
+
+export interface AnalyticsTopRecipe {
+  recipe_id: string;
+  recipe_title: string;
+  author_username: string;
+  total_events: number;
+  views: number;
+  likes: number;
+  bookmarks: number;
+  comments: number;
+}
+
+export interface AnalyticsDailyBreakdown {
+  date: string;
+  total: number;
+  views: number;
+  likes: number;
+  bookmarks: number;
+  comments: number;
+}
+
+export interface AnalyticsStats {
+  overall: AnalyticsOverall;
+  by_type: AnalyticsByType[];
+  top_recipes: AnalyticsTopRecipe[];
+  daily_events: AnalyticsDailyBreakdown[];
+}
+
+export interface AnalyticsEvent {
+  id: string;
+  event_type: string;
+  user_id: string | null;
+  user_username: string | null;
+  recipe_id: string | null;
+  recipe_title: string | null;
+  created_at: string;
+  metadata: string | null;
+}
+
+export interface AnalyticsEventsResponse {
+  items: AnalyticsEvent[];
+  next_cursor: string | null;
+}

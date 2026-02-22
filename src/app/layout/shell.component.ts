@@ -41,6 +41,10 @@ import { AuthService } from '../core/auth.service';
             <mat-icon matListItemIcon>restore</mat-icon>
             <span matListItemTitle>Content</span>
           </a>
+          <a mat-list-item routerLink="/admin/analytics" routerLinkActive="active-link">
+            <mat-icon matListItemIcon>insights</mat-icon>
+            <span matListItemTitle>Analytics</span>
+          </a>
         </mat-nav-list>
 
         <div class="sidenav-footer">
