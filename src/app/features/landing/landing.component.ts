@@ -356,10 +356,10 @@ interface ScreenShot {
     }
     .phone-frame {
       position: relative;
-      width: 240px;
+      width: 350px;
       background: #111;
-      border-radius: 36px;
-      padding: 10px;
+      border-radius: 44px;
+      padding: 12px;
       box-shadow: 0 16px 48px rgba(0,0,0,0.22);
       overflow: hidden;
       transition: transform 0.2s, box-shadow 0.2s;
@@ -369,7 +369,7 @@ interface ScreenShot {
       box-shadow: 0 28px 60px rgba(0,0,0,0.28);
     }
     .phone-frame .phone-img {
-      border-radius: 28px;
+      border-radius: 34px;
       aspect-ratio: 9/19.5;
       object-fit: cover;
       display: block;
@@ -523,7 +523,7 @@ interface ScreenShot {
     }
 
     @media (max-width: 560px) {
-      .phone-frame { width: 200px; }
+      .phone-frame { width: 280px; }
       .features-grid { grid-template-columns: 1fr; }
       .steps-row { flex-direction: column; align-items: center; }
       .step-arrow { transform: rotate(90deg); }
