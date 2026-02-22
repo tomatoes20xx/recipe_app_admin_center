@@ -303,18 +303,18 @@ interface ScreenShot {
     .hero-visual { flex: 0 0 auto; }
 
     /* Wider stack so both phones are clearly visible */
-    .phone-stack { position: relative; width: 420px; height: 560px; }
+    .phone-stack { position: relative; width: 540px; height: 700px; }
 
     .phone {
       position: absolute;
       background: #111;
-      border-radius: 40px;
-      padding: 10px;
+      border-radius: 48px;
+      padding: 12px;
       overflow: hidden;
     }
     /* Back phone: left side, slightly rotated, clearly peeking out */
     .phone-back {
-      width: 230px; height: 480px;
+      width: 300px; height: 620px;
       top: 20px; left: 0;
       transform: rotate(-6deg);
       box-shadow: 0 20px 50px rgba(0,0,0,0.18);
@@ -322,14 +322,14 @@ interface ScreenShot {
     }
     /* Front phone: right side, straight */
     .phone-front {
-      width: 240px; height: 500px;
+      width: 310px; height: 640px;
       bottom: 0; right: 0;
       box-shadow: 0 30px 70px rgba(0,0,0,0.28);
       z-index: 2;
     }
     .phone-img {
       width: 100%; height: 100%;
-      object-fit: cover; border-radius: 32px; display: block;
+      object-fit: cover; border-radius: 38px; display: block;
     }
 
     /* ─── SCREENSHOTS STRIP ───────────────── */
@@ -515,9 +515,9 @@ interface ScreenShot {
       .hero-tags { justify-content: center; }
       .hero-actions { justify-content: center; }
       .hero-visual { order: -1; }
-      .phone-stack { width: 320px; height: 440px; }
-      .phone-back { width: 180px; height: 370px; top: 10px; left: 0; }
-      .phone-front { width: 190px; height: 390px; }
+      .phone-stack { width: 380px; height: 520px; }
+      .phone-back { width: 220px; height: 450px; top: 10px; left: 0; }
+      .phone-front { width: 230px; height: 470px; }
       .features-grid { grid-template-columns: 1fr 1fr; }
       .screens-scroll { flex-wrap: nowrap; justify-content: flex-start; }
     }
