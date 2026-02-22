@@ -1,7 +1,8 @@
 import { Component, signal } from '@angular/core';
 
 interface ScreenShot {
-  src: string;
+  thumb: string;
+  full: string;
   label: string;
 }
 
@@ -14,7 +15,7 @@ interface ScreenShot {
     <nav class="nav">
       <div class="nav-inner">
         <div class="nav-logo">
-          <img src="/app_icon.png" class="nav-icon" alt="Yummy" />
+          <img src="/app_icon_web.png" class="nav-icon" alt="Yummy" />
           <span class="logo-text">Yummy</span>
         </div>
         <div class="nav-badges">
@@ -71,10 +72,10 @@ interface ScreenShot {
         <p class="section-sub">Tap any screenshot to expand it.</p>
       </div>
       <div class="screens-scroll">
-        @for (shot of screenshots; track shot.src) {
+        @for (shot of screenshots; track shot.thumb) {
           <div class="screen-item" (click)="open(shot)">
             <div class="phone-frame">
-              <img [src]="shot.src" [alt]="shot.label" class="phone-img" />
+              <img [src]="shot.thumb" [alt]="shot.label" class="phone-img" />
               <div class="expand-hint">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M15 3h6v6h-2V5h-4V3zM9 3H3v6h2V5h4V3zM15 21h4v-4h2v6h-6v-2zM3 21h6v-2H5v-4H3v6z"/></svg>
               </div>
@@ -93,7 +94,7 @@ interface ScreenShot {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
           </button>
           <div class="lightbox-phone">
-            <img [src]="selected()!.src" [alt]="selected()!.label" class="lightbox-img" />
+            <img [src]="selected()!.full" [alt]="selected()!.label" class="lightbox-img" />
           </div>
           <p class="lightbox-label">{{ selected()!.label }}</p>
         </div>
@@ -221,7 +222,7 @@ interface ScreenShot {
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-logo">
-          <img src="/app_icon.png" class="footer-icon" alt="Yummy" />
+          <img src="/app_icon_web.png" class="footer-icon" alt="Yummy" />
           <span class="logo-text">Yummy</span>
         </div>
         <p class="footer-copy">&copy; 2025 Yummy. All rights reserved.</p>
@@ -251,7 +252,7 @@ interface ScreenShot {
       display: flex; align-items: center; justify-content: space-between;
     }
     .nav-logo { display: flex; align-items: center; gap: 10px; }
-    .nav-icon { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; }
+    .nav-icon { width: 52px; height: 52px; border-radius: 12px; object-fit: cover; }
     .logo-text { font-size: 20px; font-weight: 700; color: #53B175; letter-spacing: -0.3px; }
     .nav-badges { display: flex; gap: 8px; }
     .platform-badge {
@@ -531,12 +532,12 @@ interface ScreenShot {
 })
 export class LandingComponent {
   readonly screenshots: ScreenShot[] = [
-    { src: '/screenshots/feed_light_theme.png',               label: 'Feed & Discovery' },
-    { src: '/screenshots/full_screen_feed.png',               label: 'Immersive Mode' },
-    { src: '/screenshots/recipe_search_with_what_i_have.png', label: 'Cook with What You Have' },
-    { src: '/screenshots/create_recipe.png',                  label: 'Recipe Creation' },
-    { src: '/screenshots/shopping_list.png',                  label: 'Shopping List' },
-    { src: '/screenshots/feed_dark_theme.png',                label: 'Dark Theme' },
+    { thumb: '/screenshots/thumbs/feed_light_theme_thumb.png',               full: '/screenshots/feed_light_theme.png',               label: 'Feed & Discovery' },
+    { thumb: '/screenshots/thumbs/full_screen_feed_thumb.png',               full: '/screenshots/full_screen_feed.png',               label: 'Immersive Mode' },
+    { thumb: '/screenshots/thumbs/recipe_search_with_what_i_have_thumb.png', full: '/screenshots/recipe_search_with_what_i_have.png', label: 'Cook with What You Have' },
+    { thumb: '/screenshots/thumbs/create_recipe_thumb.png',                  full: '/screenshots/create_recipe.png',                  label: 'Recipe Creation' },
+    { thumb: '/screenshots/thumbs/shopping_list_thumb.png',                  full: '/screenshots/shopping_list.png',                  label: 'Shopping List' },
+    { thumb: '/screenshots/thumbs/feed_dark_theme_thumb.png',                full: '/screenshots/feed_dark_theme.png',                label: 'Dark Theme' },
   ];
 
   selected = signal<ScreenShot | null>(null);
