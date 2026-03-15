@@ -7,6 +7,12 @@ import { LandingComponent } from './features/landing/landing.component';
 export const routes: Routes = [
   { path: '', component: LandingComponent, title: 'Yummy' },
   {
+    path: 'download',
+    title: 'Coming Soon · Yummy',
+    loadComponent: () =>
+      import('./features/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
+  },
+  {
     path: 'admin',
     children: [
       { path: 'login', component: LoginComponent, title: 'Yummy Admin' },

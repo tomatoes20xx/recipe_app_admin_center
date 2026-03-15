@@ -1,4 +1,5 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, effect } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 type Lang = 'en' | 'ka';
 
@@ -113,7 +114,7 @@ interface ScreenShot {
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   template: `
     <!-- NAV -->
     <nav class="nav">
@@ -147,11 +148,11 @@ interface ScreenShot {
           }
         </div>
         <div class="hero-actions">
-          <a class="btn-primary" href="#">
+          <a class="btn-primary" routerLink="/download">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.42c1.4.07 2.38.74 3.2.8 1.23-.24 2.4-.93 3.65-.84 1.55.13 2.72.74 3.47 1.9-3.14 1.93-2.4 6.13.68 7.34-.55 1.32-1.25 2.6-3 3.66zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
             {{ t().appStore }}
           </a>
-          <a class="btn-primary btn-android" href="#">
+          <a class="btn-primary btn-android" href="https://play.google.com/store/apps/details?id=com.tomakatcheishvili.yummy" target="_blank" rel="noopener">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5S11 23.33 11 22.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48A5.84 5.84 0 0 0 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31A5.983 5.983 0 0 0 6 7h12a5.98 5.98 0 0 0-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/></svg>
             {{ t().googlePlay }}
           </a>
@@ -528,8 +529,12 @@ interface ScreenShot {
   `],
 })
 export class LandingComponent {
-  lang = signal<Lang>('ka');
+  lang = signal<Lang>((localStorage.getItem('yummy-lang') as Lang) || 'ka');
   t = computed(() => TR[this.lang()]);
+
+  constructor() {
+    effect(() => localStorage.setItem('yummy-lang', this.lang()));
+  }
 
   readonly screenshots: ScreenShot[] = [
     { thumb: '/screenshots/thumbs/feed_light_theme_thumb.png',               full: '/screenshots/feed_light_theme.png' },
