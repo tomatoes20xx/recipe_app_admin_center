@@ -1,0 +1,315 @@
+<div class="bg-texture"></div>
+
+<!-- NAV -->
+<nav class="nav" [class.scrolled]="isScrolled">
+  <div class="wrap nav-inner">
+    <a class="logo" href="#" (click)="scrollTo('top', $event)">
+      <span class="logo-mark"><img src="/app_icon_web.png" alt="Yummy" class="logo-icon" /></span>
+      {{ cms.nav.logo }}
+    </a>
+    <div class="nav-links">
+      @for (link of cms.nav.links; track link.anchor) {
+        <a [href]="'#' + link.anchor" (click)="scrollTo(link.anchor, $event)">{{ link.label }}</a>
+      }
+    </div>
+    <a class="nav-cta" href="#download" (click)="scrollTo('download', $event)">{{ cms.nav.cta }}</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">
+        <span class="dot"></span>
+        {{ cms.hero.eyebrow }}
+      </div>
+      <h1 class="hero-title">
+        <span class="hero-line">{{ cms.hero.title.line1 }}</span>
+        <span class="hero-line">{{ cms.hero.title.line2 }}<span class="accent">{{ cms.hero.title.line2Accent }}</span></span>
+        <span class="hero-line">{{ cms.hero.title.line3 }}</span>
+      </h1>
+      <p class="hero-sub"><span style="color: #2F8A53">{{ cms.hero.appName }}</span>{{ cms.hero.sub }}</p>
+      <div class="hero-cta-row">
+        <a href="https://apps.apple.com/us/app/yummy-social-recipes/id6762482882" target="_blank" rel="noopener" class="store-badge-link">
+          <img src="/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg" alt="Download on the App Store" class="store-badge store-badge--natural" />
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.tomakatcheishvili.yummy" target="_blank" rel="noopener" class="store-badge-link">
+          <img src="/GetItOnGooglePlay_Badge_Web_color_English.svg" alt="Get it on Google Play" class="store-badge" />
+        </a>
+      </div>
+    </div>
+
+    <!-- PHONE MOCKUP -->
+    <div class="phone-stage">
+      <div class="phone-bg"><div class="blob"></div></div>
+
+      <div class="sticker">
+        {{ cms.phone.sticker[0] }}<br/>
+        {{ cms.phone.sticker[1] }}<br/>
+        {{ cms.phone.sticker[2] }}
+      </div>
+
+      <div class="phone">
+        <div class="phone-screen">
+          <img src="/screenshots/feed_light_new.jpg" alt="Yummy app screenshot" class="phone-screenshot" />
+        </div>
+      </div>
+
+      <div class="float-tag t1">
+        <div class="icon">✓</div>
+        <div>
+          <div class="label">{{ cms.phone.floatTags[0].label }}</div>
+          <span class="meta">{{ cms.phone.floatTags[0].meta }}</span>
+        </div>
+      </div>
+
+      <div class="float-tag t3">
+        <div class="icon">⏱</div>
+        <div>
+          <div class="label">{{ cms.phone.floatTags[2].label }}</div>
+          <span class="meta">{{ cms.phone.floatTags[2].meta }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MARQUEE -->
+<div class="marquee">
+  <div class="marquee-track">
+    @for (repeat of [0, 1]; track repeat) {
+      <span>
+        @for (item of cms.marquee; track item) {
+          {{ item }} <em class="sep">✦</em>
+        }
+      </span>
+    }
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="wrap">
+    <div class="feat-head reveal">
+      <div>
+        <span class="section-label">{{ cms.features.label }}</span>
+        <h2 class="section-title">{{ cms.features.titlePre }} <em>{{ cms.features.titleEm }}</em>.</h2>
+      </div>
+      <p>{{ cms.features.sub }}</p>
+    </div>
+
+    <div class="feat-grid">
+      <!-- 01: Discovery -->
+      <div class="feat-card span-7 reveal">
+        <div class="feat-num">{{ cms.features.card1.num }}</div>
+        <h3 class="feat-title">
+          {{ cms.features.card1.titlePre }}
+          <em style="font-style:italic;color:var(--green-deep);">{{ cms.features.card1.titleEm }}</em>
+        </h3>
+        <p class="feat-desc">{{ cms.features.card1.desc }}</p>
+        <div class="feat-visual">
+          <div class="recipe-stack">
+            @for (rs of cms.features.card1.stack; track rs.meta; let i = $index) {
+              <div class="rs" [class]="'rs r' + (i + 1)">
+                <div class="rs-img">
+                  <img [src]="rs.img" [alt]="rs.title[0]" class="rs-photo" />
+                </div>
+                <div class="rs-tt">{{ rs.title[0] }}<br/>{{ rs.title[1] }}</div>
+                <div class="rs-mt">{{ rs.meta }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- 02: Shopping list -->
+      <div class="feat-card span-5 dark reveal">
+        <div class="feat-num">{{ cms.features.card2.num }}</div>
+        <h3 class="feat-title">
+          {{ cms.features.card2.titlePre }}
+          <span style="font-style:italic;color:var(--green);">{{ cms.features.card2.titleEm }}</span>
+        </h3>
+        <p class="feat-desc">{{ cms.features.card2.desc }}</p>
+        <div class="list-mock feat-visual">
+          @for (item of cms.features.card2.list; track item.name) {
+            <div class="list-row" [class.done]="item.done">
+              <div class="list-check">{{ item.done ? '✓' : '' }}</div>
+              <div class="list-name">{{ item.name }}</div>
+              <div class="list-qty">{{ item.qty }}</div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- 03: Collections -->
+      <div class="feat-card span-5 reveal">
+        <div class="feat-num">{{ cms.features.card3.num }}</div>
+        <h3 class="feat-title">
+          {{ cms.features.card3.titlePre }}
+          <em style="font-style:italic;color:var(--green-deep);">{{ cms.features.card3.titleEm }}</em>
+        </h3>
+        <p class="feat-desc">{{ cms.features.card3.desc }}</p>
+        <div class="feat-visual" style="display:flex; gap:8px; flex-wrap:wrap;">
+          @for (col of cms.features.card3.collections; track col.label) {
+            <div class="share-bubble" [style]="col.style">{{ col.icon }} {{ col.label }}</div>
+          }
+        </div>
+      </div>
+
+      <!-- 04: Sharing -->
+      <div class="feat-card span-7 green reveal">
+        <div class="feat-num">{{ cms.features.card4.num }}</div>
+        <h3 class="feat-title">
+          {{ cms.features.card4.titlePre }}
+          <span style="font-style:italic;">{{ cms.features.card4.titleEm }}</span>
+        </h3>
+        <p class="feat-desc">{{ cms.features.card4.desc }}</p>
+        <div class="feat-visual" style="display:flex;flex-wrap:wrap;gap:6px;">
+          @for (name of cms.features.card4.shareWith; track name) {
+            <div class="share-bubble">→ {{ name }}</div>
+          }
+          <div class="share-bubble" style="background:white;color:var(--green-deep);">
+            + {{ cms.features.card4.copyLink }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="strip" id="how">
+  <div class="wrap">
+    <div class="steps">
+      <div class="steps-inner">
+        <div class="reveal">
+          <span class="section-label">{{ cms.steps.label }}</span>
+          <h2 class="section-title">{{ cms.steps.titlePre }} <em>{{ cms.steps.titleEm }}</em>.</h2>
+        </div>
+        <div class="step-grid">
+          @for (step of cms.steps.items; track step.num) {
+            <div class="step reveal">
+              <span class="step-num">{{ step.num }}</span>
+              <h3 class="step-title">{{ step.title }}</h3>
+              <p class="step-desc">{{ step.desc }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SHOWCASE / RECIPES -->
+<section class="showcase" id="recipes">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="section-label">{{ cms.showcase.label }}</span>
+      <h2 class="section-title">{{ cms.showcase.titlePre }} <em>{{ cms.showcase.titleEm }}</em>.</h2>
+    </div>
+    <div class="showcase-grid">
+      @for (r of cms.showcase.recipes; track r.title) {
+        <article class="rcard reveal" [ngClass]="r.cls">
+          <div class="rcard-img">
+            <img [src]="r.img" [alt]="r.title" class="rcard-photo" />
+            <span class="rcard-pill">{{ r.pill }}</span>
+            <span class="rcard-fav">♥</span>
+          </div>
+          <div class="rcard-body">
+            <h3 class="rcard-title">{{ r.title }}</h3>
+            <p class="rcard-desc">{{ r.desc }}</p>
+            <div class="rcard-meta">
+              @for (m of r.meta; track m) {
+                <span><span class="dot"></span>{{ m }}</span>
+              }
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL / STATS -->
+<section class="testify">
+  <div class="wrap testify-grid">
+    <div class="reveal">
+      <span class="quote-mark">"</span>
+      <p class="quote">
+        {{ cms.testimonial.quotePre }}
+        <em style="font-style:italic;color:var(--green-deep);">{{ cms.testimonial.quoteEm }}</em>
+      </p>
+      <div class="quote-attr">{{ cms.testimonial.attr }}</div>
+    </div>
+    <div class="testify-stats reveal">
+      @for (s of cms.testimonial.stats; track s.num) {
+        <div class="tstat">
+          <div class="tstat-num">{{ s.num }}</div>
+          <div class="tstat-label">{{ s.label }}</div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="download">
+  <div class="wrap">
+    <h2 class="cta-title reveal">{{ cms.cta.titlePre }} <em>{{ cms.cta.titleEm }}</em></h2>
+    <p class="cta-sub reveal">{{ cms.cta.sub }}</p>
+    <div class="cta-row reveal">
+      <a href="https://apps.apple.com/us/app/yummy-social-recipes/id6762482882" target="_blank" rel="noopener" class="store-badge-link">
+        <img src="/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg" alt="Download on the App Store" class="store-badge store-badge--natural" />
+      </a>
+      <a href="https://play.google.com/store/apps/details?id=com.tomakatcheishvili.yummy" target="_blank" rel="noopener" class="store-badge-link">
+        <img src="/GetItOnGooglePlay_Badge_Web_color_English.svg" alt="Get it on Google Play" class="store-badge" />
+      </a>
+    </div>
+    <div class="qr-pair reveal">
+      <a href="https://apps.apple.com/us/app/yummy-social-recipes/id6762482882" target="_blank" rel="noopener" class="qr-item">
+        <div class="qr"><img src="/app_store_qr.svg" alt="App Store QR" class="qr-img" /></div>
+        <span class="qr-label">App Store</span>
+      </a>
+      <a href="https://play.google.com/store/apps/details?id=com.tomakatcheishvili.yummy" target="_blank" rel="noopener" class="qr-item">
+        <div class="qr"><img src="/play_store_qr.svg" alt="Google Play QR" class="qr-img" /></div>
+        <span class="qr-label">Google Play</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="logo" href="#" (click)="scrollTo('top', $event)">
+          <span class="logo-mark"><img src="/app_icon_web.png" alt="Yummy" class="logo-icon" /></span>
+          {{ cms.footer.logo }}
+        </a>
+        <p class="foot-blurb">{{ cms.footer.blurb }}</p>
+      </div>
+      @for (section of cms.footer.sections; track section.heading) {
+        <div>
+          <h4>{{ section.heading }}</h4>
+          <ul>
+            @for (link of section.links; track link.label) {
+              <li>
+                @if ($any(link).anchor) {
+                  <a [href]="'#' + $any(link).anchor" (click)="scrollTo($any(link).anchor, $event)">{{ link.label }}</a>
+                } @else {
+                  <a [href]="$any(link).href">{{ link.label }}</a>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+    <div class="foot-bottom">
+      <span>{{ cms.footer.copyright }}</span>
+      <span>{{ cms.footer.version }}</span>
+    </div>
+  </div>
+</footer>
