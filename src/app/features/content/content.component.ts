@@ -1,191 +1,171 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DatePipe } from '@angular/common';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../core/api.service';
 import { HiddenComment, HiddenRecipe } from '../../core/models';
 
+type ActiveTab = 'recipes' | 'comments';
 type CommentFilter = 'all' | 'reported' | 'flagged_only' | 'deleted_only';
 
 @Component({
   selector: 'app-content',
   standalone: true,
-  imports: [
-    MatTabsModule,
-    MatTableModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatCardModule,
-    MatChipsModule,
-    MatSnackBarModule,
-    DatePipe,
-  ],
+  imports: [DatePipe, MatProgressSpinnerModule, MatSnackBarModule],
   template: `
-    <div class="page">
-      <div class="page-header">
-        <h1>Hidden Content</h1>
+    <div class="adm-page">
+
+      <!-- ── Page head ── -->
+      <div class="adm-page-head">
+        <div>
+          <h2 class="adm-page-title">Hidden content</h2>
+          <div class="adm-page-sub">Recipes and comments that have been auto-flagged or removed.</div>
+        </div>
       </div>
 
-      <mat-tab-group (selectedIndexChange)="onTabChange($event)">
-        <!-- ── Recipes ──────────────────────────────────────────────── -->
-        <mat-tab label="Recipes">
-          <mat-card class="tab-card">
-            @if (recipesLoading() && recipes().length === 0) {
-              <div class="loading-state"><mat-spinner diameter="40" /></div>
-            } @else {
-              <table mat-table [dataSource]="recipes()" class="full-width">
+      <!-- ── Tabs ── -->
+      <div class="adm-tabs" style="margin-bottom:14px;">
+        <button class="adm-tab" [class.active]="activeTab() === 'recipes'" (click)="switchTab('recipes')">
+          Recipes
+          <span style="color:var(--ink-400); margin-left:4px;">{{ recipes().length }}</span>
+        </button>
+        <button class="adm-tab" [class.active]="activeTab() === 'comments'" (click)="switchTab('comments')">
+          Comments
+          <span style="color:var(--ink-400); margin-left:4px;">{{ comments().length }}</span>
+        </button>
+      </div>
 
-                <ng-container matColumnDef="title">
-                  <th mat-header-cell *matHeaderCellDef>Title</th>
-                  <td mat-cell *matCellDef="let r" class="preview-cell">{{ r.title }}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="author">
-                  <th mat-header-cell *matHeaderCellDef>Author</th>
-                  <td mat-cell *matCellDef="let r">&#64;{{ r.author_username }}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="reports">
-                  <th mat-header-cell *matHeaderCellDef>Reports</th>
-                  <td mat-cell *matCellDef="let r">
-                    <span class="report-count">{{ r.report_count }}</span>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="date">
-                  <th mat-header-cell *matHeaderCellDef>Created</th>
-                  <td mat-cell *matCellDef="let r">{{ r.created_at | date:'MMM d, y' }}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef>Actions</th>
-                  <td mat-cell *matCellDef="let r">
-                    <button mat-stroked-button color="primary" (click)="restoreRecipe(r)" [disabled]="actionLoading()">
-                      <mat-icon>restore</mat-icon> Restore
-                    </button>
-                  </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="recipeColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: recipeColumns;"></tr>
-                <tr class="mat-row" *matNoDataRow>
-                  <td class="mat-cell empty-state" [attr.colspan]="recipeColumns.length">No hidden recipes.</td>
-                </tr>
+      <!-- ── Recipes tab ── -->
+      @if (activeTab() === 'recipes') {
+        <div class="adm-card">
+          @if (recipesLoading() && recipes().length === 0) {
+            <div class="adm-loading"><mat-spinner diameter="40" /></div>
+          } @else {
+            <div class="adm-table-wrap">
+              <table class="adm-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Reports</th>
+                    <th>Created</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (recipes().length === 0) {
+                    <tr><td colspan="5" class="adm-empty">No hidden recipes.</td></tr>
+                  }
+                  @for (r of recipes(); track r.id) {
+                    <tr>
+                      <td class="recipe-title-cell" style="font-weight:500; color:var(--ink-900);">{{ r.title }}</td>
+                      <td class="adm-muted">&#64;{{ r.author_username }}</td>
+                      <td>
+                        <span class="adm-badge banned adm-tabular">{{ r.report_count }} reports</span>
+                      </td>
+                      <td class="adm-muted" style="white-space:nowrap; font-size:12px;">{{ r.created_at | date:'MMM d, y' }}</td>
+                      <td class="adm-text-right">
+                        <div class="adm-hstack" style="justify-content:flex-end; gap:6px;">
+                          <button class="adm-btn sm outline" [disabled]="actionLoading()">Preview</button>
+                          <button class="adm-btn sm primary" (click)="restoreRecipe(r)" [disabled]="actionLoading()">
+                            Restore
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
               </table>
+            </div>
+            <div class="adm-load-more">
+              @if (recipeNextCursor()) {
+                <button class="adm-btn outline" (click)="loadMoreRecipes()" [disabled]="recipesLoading()">
+                  @if (recipesLoading()) { <mat-spinner diameter="16" /> } @else { Load more }
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
 
-              <div class="load-more">
-                @if (recipeNextCursor()) {
-                  <button mat-stroked-button (click)="loadMoreRecipes()" [disabled]="recipesLoading()">
-                    @if (recipesLoading()) { <mat-spinner diameter="18" /> } @else { Load More }
-                  </button>
-                }
-              </div>
-            }
-          </mat-card>
-        </mat-tab>
+      <!-- ── Comments tab ── -->
+      @if (activeTab() === 'comments') {
+        <div class="adm-chips" style="margin-bottom:12px;">
+          @for (f of commentFilters; track f.value) {
+            <button class="adm-chip" [class.active]="activeCommentFilter() === f.value"
+                    (click)="setCommentFilter(f.value)">
+              {{ f.label }}
+            </button>
+          }
+        </div>
 
-        <!-- ── Comments ────────────────────────────────────────────── -->
-        <mat-tab label="Comments">
-          <mat-chip-listbox class="filter-chips" (change)="onCommentFilterChange($event.value)">
-            @for (f of commentFilters; track f.value) {
-              <mat-chip-option [value]="f.value" [selected]="activeCommentFilter() === f.value">
-                {{ f.label }}
-              </mat-chip-option>
-            }
-          </mat-chip-listbox>
-
-          <mat-card class="tab-card">
-            @if (commentsLoading() && comments().length === 0) {
-              <div class="loading-state"><mat-spinner diameter="40" /></div>
-            } @else {
-              <table mat-table [dataSource]="comments()" class="full-width">
-
-                <ng-container matColumnDef="content">
-                  <th mat-header-cell *matHeaderCellDef>Comment</th>
-                  <td mat-cell *matCellDef="let c" class="preview-cell">{{ c.content }}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="author">
-                  <th mat-header-cell *matHeaderCellDef>Author</th>
-                  <td mat-cell *matCellDef="let c">&#64;{{ c.author_username }}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="reports">
-                  <th mat-header-cell *matHeaderCellDef>Reports</th>
-                  <td mat-cell *matCellDef="let c">
-                    <span class="report-count">{{ c.report_count }}</span>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="date">
-                  <th mat-header-cell *matHeaderCellDef>Created</th>
-                  <td mat-cell *matCellDef="let c">{{ c.created_at | date:'MMM d, y' }}</td>
-                </ng-container>
-
-                <ng-container matColumnDef="actions">
-                  <th mat-header-cell *matHeaderCellDef>Actions</th>
-                  <td mat-cell *matCellDef="let c">
-                    <button mat-stroked-button color="primary" (click)="restoreComment(c)" [disabled]="actionLoading()">
-                      <mat-icon>restore</mat-icon> Restore
-                    </button>
-                  </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="commentColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: commentColumns;"></tr>
-                <tr class="mat-row" *matNoDataRow>
-                  <td class="mat-cell empty-state" [attr.colspan]="commentColumns.length">No hidden comments.</td>
-                </tr>
+        <div class="adm-card">
+          @if (commentsLoading() && comments().length === 0) {
+            <div class="adm-loading"><mat-spinner diameter="40" /></div>
+          } @else {
+            <div class="adm-table-wrap">
+              <table class="adm-table">
+                <thead>
+                  <tr>
+                    <th>Comment</th>
+                    <th>Author</th>
+                    <th>Reports</th>
+                    <th>Created</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (comments().length === 0) {
+                    <tr><td colspan="5" class="adm-empty">No hidden comments.</td></tr>
+                  }
+                  @for (c of comments(); track c.id) {
+                    <tr>
+                      <td class="comment-content-cell adm-muted">{{ c.content }}</td>
+                      <td class="adm-muted">&#64;{{ c.author_username }}</td>
+                      <td>
+                        <span class="adm-badge banned adm-tabular">{{ c.report_count }} reports</span>
+                      </td>
+                      <td class="adm-muted" style="white-space:nowrap; font-size:12px;">{{ c.created_at | date:'MMM d, y' }}</td>
+                      <td class="adm-text-right">
+                        <button class="adm-btn sm primary" (click)="restoreComment(c)" [disabled]="actionLoading()">
+                          Restore
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
               </table>
+            </div>
+            <div class="adm-load-more">
+              @if (commentNextCursor()) {
+                <button class="adm-btn outline" (click)="loadMoreComments()" [disabled]="commentsLoading()">
+                  @if (commentsLoading()) { <mat-spinner diameter="16" /> } @else { Load more }
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
 
-              <div class="load-more">
-                @if (commentNextCursor()) {
-                  <button mat-stroked-button (click)="loadMoreComments()" [disabled]="commentsLoading()">
-                    @if (commentsLoading()) { <mat-spinner diameter="18" /> } @else { Load More }
-                  </button>
-                }
-              </div>
-            }
-          </mat-card>
-        </mat-tab>
-      </mat-tab-group>
     </div>
   `,
   styles: [`
-    .page { padding: 24px; }
-    .page-header { margin-bottom: 16px; }
-    h1 { margin: 0; font-size: 22px; font-weight: 600; }
-    .filter-chips { display: block; margin-top: 16px; margin-bottom: 8px; }
-    .tab-card { margin-top: 16px; }
-    .loading-state { display: flex; justify-content: center; padding: 48px; }
-    .load-more { display: flex; justify-content: center; padding: 16px; }
-    .full-width { width: 100%; }
-    .preview-cell { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .report-count { background: #ffebee; color: #c62828; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
-    .empty-state { text-align: center; padding: 40px; color: rgba(0,0,0,0.38); }
-    td.mat-cell { padding: 12px 16px; }
-    th.mat-header-cell { padding: 12px 16px; font-weight: 600; color: rgba(0,0,0,0.6); }
+    .recipe-title-cell  { max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .comment-content-cell { max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   `],
 })
 export class ContentComponent implements OnInit {
-  recipeColumns = ['title', 'author', 'reports', 'date', 'actions'];
-  commentColumns = ['content', 'author', 'reports', 'date', 'actions'];
   limit = 20;
+
+  activeTab = signal<ActiveTab>('recipes');
 
   recipes = signal<HiddenRecipe[]>([]);
   recipeNextCursor = signal<string | null>(null);
   recipesLoading = signal(false);
 
   commentFilters: { label: string; value: CommentFilter }[] = [
-    { label: 'All flagged', value: 'all' },
-    { label: 'Any report', value: 'reported' },
+    { label: 'All flagged',  value: 'all' },
+    { label: 'Any report',  value: 'reported' },
     { label: 'Flagged only', value: 'flagged_only' },
     { label: 'Deleted only', value: 'deleted_only' },
   ];
@@ -202,6 +182,12 @@ export class ContentComponent implements OnInit {
   ngOnInit() {
     this.loadRecipes();
     this.loadComments();
+  }
+
+  switchTab(tab: ActiveTab) {
+    this.activeTab.set(tab);
+    if (tab === 'recipes' && this.recipes().length === 0) this.loadRecipes();
+    if (tab === 'comments' && this.comments().length === 0) this.loadComments();
   }
 
   loadRecipes() {
@@ -266,13 +252,8 @@ export class ContentComponent implements OnInit {
     });
   }
 
-  onCommentFilterChange(value: CommentFilter) {
-    this.activeCommentFilter.set(value ?? 'all');
+  setCommentFilter(value: CommentFilter) {
+    this.activeCommentFilter.set(value);
     this.loadComments();
-  }
-
-  onTabChange(index: number) {
-    if (index === 0) this.loadRecipes();
-    else this.loadComments();
   }
 }

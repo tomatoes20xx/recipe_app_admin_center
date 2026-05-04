@@ -1,11 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { MatTableModule } from '@angular/material/table';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatCardModule } from '@angular/material/card';
 import { DatePipe } from '@angular/common';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApiService } from '../../core/api.service';
 import { Report, ReportTargetType } from '../../core/models';
 
@@ -14,127 +9,108 @@ type FilterType = 'all' | ReportTargetType;
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [
-    MatTableModule,
-    MatChipsModule,
-    MatIconModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatCardModule,
-    DatePipe,
-  ],
+  imports: [DatePipe, MatProgressSpinnerModule],
   template: `
-    <div class="page">
-      <div class="page-header">
-        <h1>Reports</h1>
+    <div class="adm-page">
+
+      <!-- ── Page head ── -->
+      <div class="adm-page-head">
+        <div>
+          <h2 class="adm-page-title">Reports</h2>
+          <div class="adm-page-sub">Review user-submitted reports and take moderation action.</div>
+        </div>
+        <div class="adm-hstack">
+          <button class="adm-btn outline">Filters</button>
+          <button class="adm-btn primary">Bulk resolve</button>
+        </div>
       </div>
 
-      <mat-chip-listbox class="filter-chips" (change)="onFilterChange($event.value)">
-        @for (f of filters; track f.value) {
-          <mat-chip-option [value]="f.value" [selected]="activeFilter() === f.value">
-            {{ f.label }}
-          </mat-chip-option>
-        }
-      </mat-chip-listbox>
+      <!-- ── Filter chips ── -->
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+        <div class="adm-chips">
+          @for (f of filters; track f.value) {
+            <button class="adm-chip" [class.active]="activeFilter() === f.value"
+                    (click)="setFilter(f.value)">
+              {{ f.label }}
+              <span class="chip-count">{{ f.count }}</span>
+            </button>
+          }
+        </div>
+      </div>
 
-      <mat-card>
+      <!-- ── Table card ── -->
+      <div class="adm-card">
         @if (loading() && reports().length === 0) {
-          <div class="loading-state">
-            <mat-spinner diameter="40" />
-          </div>
+          <div class="adm-loading"><mat-spinner diameter="40" /></div>
         } @else {
-          <table mat-table [dataSource]="reports()" class="full-width">
-
-            <ng-container matColumnDef="type">
-              <th mat-header-cell *matHeaderCellDef>Type</th>
-              <td mat-cell *matCellDef="let r">
-                <span class="type-chip type-{{ r.target_type }}">{{ r.target_type }}</span>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="reason">
-              <th mat-header-cell *matHeaderCellDef>Reason</th>
-              <td mat-cell *matCellDef="let r">{{ r.reason }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="preview">
-              <th mat-header-cell *matHeaderCellDef>Content</th>
-              <td mat-cell *matCellDef="let r" class="preview-cell">
-                {{ r.target_detail ?? '—' }}
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="reporter">
-              <th mat-header-cell *matHeaderCellDef>Reporter</th>
-              <td mat-cell *matCellDef="let r">{{ r.reporter_username || 'Anonymous' }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="date">
-              <th mat-header-cell *matHeaderCellDef>Date</th>
-              <td mat-cell *matCellDef="let r">{{ r.created_at | date:'MMM d, y' }}</td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="columns"></tr>
-            <tr mat-row *matRowDef="let row; columns: columns;"></tr>
-
-            <tr class="mat-row" *matNoDataRow>
-              <td class="mat-cell empty-state" [attr.colspan]="columns.length">
-                No reports found.
-              </td>
-            </tr>
-          </table>
-
-          <div class="load-more">
-            @if (nextCursor()) {
-              <button mat-stroked-button (click)="loadMore()" [disabled]="loading()">
-                @if (loading()) {
-                  <mat-spinner diameter="18" />
-                } @else {
-                  Load More
+          <div class="adm-table-wrap">
+            <table class="adm-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Reason</th>
+                  <th>Content</th>
+                  <th>Reporter</th>
+                  <th>Date</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (reports().length === 0) {
+                  <tr>
+                    <td colspan="6" class="adm-empty">No reports found.</td>
+                  </tr>
                 }
+                @for (r of reports(); track r.id) {
+                  <tr>
+                    <td>
+                      <span class="adm-badge {{ r.target_type }}">
+                        <span class="dot"></span>{{ r.target_type }}
+                      </span>
+                    </td>
+                    <td style="font-weight:500; color:var(--ink-900);">{{ r.reason }}</td>
+                    <td class="preview-cell adm-muted">{{ r.target_detail ?? '—' }}</td>
+                    <td class="adm-muted">{{ r.reporter_username ? '@' + r.reporter_username : 'Anonymous' }}</td>
+                    <td class="adm-muted" style="white-space:nowrap; font-size:12px;">{{ r.created_at | date:'MMM d, y' }}</td>
+                    <td class="adm-text-right">
+                      <div class="adm-hstack" style="justify-content:flex-end; gap:6px;">
+                        <button class="adm-btn sm outline">Review</button>
+                        <button class="adm-btn sm danger">Remove</button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="adm-load-more">
+            @if (nextCursor()) {
+              <button class="adm-btn outline" (click)="loadMore()" [disabled]="loading()">
+                @if (loading()) { <mat-spinner diameter="16" /> }
+                @else { Load more }
               </button>
             }
           </div>
         }
-      </mat-card>
+      </div>
     </div>
   `,
   styles: [`
-    .page { padding: 24px; }
-    .page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-    h1 { margin: 0; font-size: 22px; font-weight: 600; }
-
-    .filter-chips { margin-bottom: 16px; }
-
-    .loading-state { display: flex; justify-content: center; padding: 48px; }
-    .load-more { display: flex; justify-content: center; padding: 16px; }
-
-    .full-width { width: 100%; }
-
-    .type-chip {
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-      text-transform: capitalize;
+    .preview-cell {
+      max-width: 260px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .type-recipe { background: #e3f2fd; color: #1565c0; }
-    .type-comment { background: #f3e5f5; color: #6a1b9a; }
-    .type-user { background: #fff3e0; color: #e65100; }
-
-    .preview-cell { max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .empty-state { text-align: center; padding: 40px; color: rgba(0,0,0,0.38); }
-    td.mat-cell { padding: 12px 16px; }
-    th.mat-header-cell { padding: 12px 16px; font-weight: 600; color: rgba(0,0,0,0.6); }
   `],
 })
 export class ReportsComponent implements OnInit {
-  columns = ['type', 'reason', 'preview', 'reporter', 'date'];
-  filters: { label: string; value: FilterType }[] = [
-    { label: 'All', value: 'all' },
-    { label: 'Recipes', value: 'recipe' },
-    { label: 'Comments', value: 'comment' },
-    { label: 'Users', value: 'user' },
+  filters: { label: string; value: FilterType; count: string }[] = [
+    { label: 'All',      value: 'all',     count: '—' },
+    { label: 'Recipes',  value: 'recipe',  count: '—' },
+    { label: 'Comments', value: 'comment', count: '—' },
+    { label: 'Users',    value: 'user',    count: '—' },
   ];
 
   reports = signal<Report[]>([]);
@@ -156,6 +132,7 @@ export class ReportsComponent implements OnInit {
         this.reports.set(res.reports);
         this.nextCursor.set(res.next_cursor);
         this.loading.set(false);
+        this.filters[0].count = String(res.reports.length) + (res.next_cursor ? '+' : '');
       },
       error: () => this.loading.set(false),
     });
@@ -174,8 +151,8 @@ export class ReportsComponent implements OnInit {
     });
   }
 
-  onFilterChange(value: FilterType) {
-    this.activeFilter.set(value ?? 'all');
+  setFilter(value: FilterType) {
+    this.activeFilter.set(value);
     this.load();
   }
 }
