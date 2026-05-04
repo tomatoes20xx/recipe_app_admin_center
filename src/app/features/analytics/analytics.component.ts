@@ -1,17 +1,30 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { ApiService } from '../../core/api.service';
 import { AnalyticsStats, AnalyticsEvent } from '../../core/models';
+
+type ActiveTab = 'overview' | 'events';
+
+function fmtNum(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+  return String(n);
+}
+
+const EVENT_COLORS: Record<string, string> = {
+  view:     'var(--info)',
+  like:     '#D6336C',
+  bookmark: 'var(--violet)',
+  comment:  'var(--warn)',
+  cook:     'var(--yummy-green)',
+  search:   '#283593',
+};
 
 @Component({
   selector: 'app-analytics',
@@ -20,410 +33,405 @@ import { AnalyticsStats, AnalyticsEvent } from '../../core/models';
     DecimalPipe,
     DatePipe,
     FormsModule,
-    MatTabsModule,
-    MatCardModule,
-    MatTableModule,
-    MatChipsModule,
-    MatIconModule,
-    MatButtonModule,
     MatProgressSpinnerModule,
     MatInputModule,
     MatFormFieldModule,
+    MatIconModule,
+    MatButtonModule,
   ],
   template: `
-    <div class="analytics-page">
-      <h1 class="page-title">Analytics</h1>
+    <div class="adm-page">
 
-      <mat-tab-group animationDuration="0">
+      <!-- ── Page head ── -->
+      <div class="adm-page-head">
+        <div>
+          <h2 class="adm-page-title">Analytics</h2>
+          <div class="adm-page-sub">Engagement and growth across the Yummy app.</div>
+        </div>
+        <div class="adm-hstack">
+          <button class="adm-btn outline">Last 30 days</button>
+          <button class="adm-btn outline">Export</button>
+        </div>
+      </div>
 
-        <!-- ── Overview ── -->
-        <mat-tab label="Overview">
-          <div class="tab-content">
-            @if (statsLoading()) {
-              <div class="loading-state"><mat-spinner diameter="40" /></div>
-            } @else if (statsError()) {
-              <div class="empty-state">
-                <mat-icon>error_outline</mat-icon>
-                <p>Failed to load analytics data.</p>
-                <button mat-stroked-button (click)="loadStats()">Retry</button>
-              </div>
-            } @else if (stats()) {
+      <!-- ── Tabs ── -->
+      <div class="adm-tabs" style="margin-bottom:22px;">
+        <button class="adm-tab" [class.active]="activeTab() === 'overview'" (click)="activeTab.set('overview')">Overview</button>
+        <button class="adm-tab" [class.active]="activeTab() === 'events'"   (click)="activeTab.set('events')">Events log</button>
+      </div>
 
-              <!-- Summary cards -->
-              <div class="stat-cards">
-                <mat-card class="stat-card">
-                  <mat-icon class="stat-icon">bar_chart</mat-icon>
-                  <div class="stat-value">{{ stats()!.overall.total_events | number }}</div>
-                  <div class="stat-label">Total Events</div>
-                </mat-card>
-                <mat-card class="stat-card">
-                  <mat-icon class="stat-icon">people</mat-icon>
-                  <div class="stat-value">{{ stats()!.overall.unique_users | number }}</div>
-                  <div class="stat-label">Unique Users</div>
-                </mat-card>
-                <mat-card class="stat-card">
-                  <mat-icon class="stat-icon">restaurant_menu</mat-icon>
-                  <div class="stat-value">{{ stats()!.overall.unique_recipes | number }}</div>
-                  <div class="stat-label">Unique Recipes</div>
-                </mat-card>
-                <mat-card class="stat-card">
-                  <mat-icon class="stat-icon">trending_up</mat-icon>
-                  <div class="stat-value">{{ stats()!.overall.events_last_24h | number }}</div>
-                  <div class="stat-label">Last 24 Hours</div>
-                </mat-card>
-              </div>
+      <!-- ════════════════════ OVERVIEW TAB ════════════════════ -->
+      @if (activeTab() === 'overview') {
 
-              <!-- Signup funnel -->
-              @if (signupFunnel().signup) {
-                <mat-card class="section-card">
-                  <mat-card-header><mat-card-title>Signup Funnel</mat-card-title></mat-card-header>
-                  <mat-card-content>
-                    <div class="funnel-flow">
-                      <div class="funnel-step funnel-step--main">
-                        <div class="funnel-count">{{ signupFunnel().signup!.total | number }}</div>
-                        <div class="funnel-step-label">Signups</div>
-                        <div class="funnel-step-sub">{{ signupFunnel().signup!.last_24h }} today · {{ signupFunnel().signup!.last_7d }} this week</div>
-                      </div>
-                      @if (signupFunnel().verifyRate !== null) {
-                        <div class="funnel-arrow">›</div>
-                        <div class="funnel-step">
-                          <div class="funnel-pct">{{ signupFunnel().verifyRate! | number:'1.1-1' }}%</div>
-                          <div class="funnel-step-label">Email Verified</div>
-                        </div>
-                      }
-                      @if (signupFunnel().onboardingRate !== null) {
-                        <div class="funnel-arrow">›</div>
-                        <div class="funnel-step">
-                          <div class="funnel-pct">{{ signupFunnel().onboardingRate! | number:'1.1-1' }}%</div>
-                          <div class="funnel-step-label">Onboarded</div>
-                        </div>
-                      }
-                    </div>
-                  </mat-card-content>
-                </mat-card>
-              }
+        @if (statsLoading()) {
+          <div class="adm-loading" style="height:200px;"><mat-spinner diameter="48" /></div>
 
-              <!-- Feed CTR -->
-              @if (feedCtr()) {
-                <mat-card class="section-card">
-                  <mat-card-header><mat-card-title>Feed CTR</mat-card-title></mat-card-header>
-                  <mat-card-content>
-                    <div class="ctr-row">
-                      <div class="ctr-stat">
-                        <div class="ctr-value">{{ feedCtr()!.impressions.total | number }}</div>
-                        <div class="ctr-label">Impressions</div>
-                        <div class="ctr-sub">{{ feedCtr()!.impressions.last_24h }} today · {{ feedCtr()!.impressions.last_7d }} this week</div>
-                      </div>
-                      <div class="ctr-stat">
-                        <div class="ctr-value">{{ feedCtr()!.taps?.total | number }}</div>
-                        <div class="ctr-label">Taps</div>
-                        <div class="ctr-sub">{{ feedCtr()!.taps?.last_24h ?? 0 }} today · {{ feedCtr()!.taps?.last_7d ?? 0 }} this week</div>
-                      </div>
-                      <div class="ctr-stat ctr-stat--highlight">
-                        <div class="ctr-value">{{ feedCtr()!.ctr | number:'1.1-1' }}%</div>
-                        <div class="ctr-label">CTR</div>
-                        <div class="ctr-sub">taps ÷ impressions</div>
-                      </div>
-                    </div>
-                  </mat-card-content>
-                </mat-card>
-              }
-
-              <!-- Events by type -->
-              <mat-card class="section-card">
-                <mat-card-header>
-                  <mat-card-title>Events by Type</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="type-grid">
-                    @for (entry of stats()!.by_type; track entry.event_type) {
-                      <div class="type-item">
-                        <div class="type-count">{{ entry.total | number }}</div>
-                        <div class="type-name">{{ entry.event_type }}</div>
-                        <div class="type-sub">{{ entry.last_24h }} today · {{ entry.last_7d }} this week</div>
-                      </div>
-                    }
-                  </div>
-                </mat-card-content>
-              </mat-card>
-
-              <!-- Top recipes -->
-              <mat-card class="section-card">
-                <mat-card-header>
-                  <mat-card-title>Top Recipes</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <table mat-table [dataSource]="stats()!.top_recipes" class="full-width">
-                    <ng-container matColumnDef="rank">
-                      <th mat-header-cell *matHeaderCellDef class="rank-col">#</th>
-                      <td mat-cell *matCellDef="let r; let i = index" class="rank-col">{{ i + 1 }}</td>
-                    </ng-container>
-                    <ng-container matColumnDef="title">
-                      <th mat-header-cell *matHeaderCellDef>Recipe</th>
-                      <td mat-cell *matCellDef="let r">
-                        <div class="recipe-title">{{ r.recipe_title }}</div>
-                        <div class="recipe-author">by {{ r.author_username }}</div>
-                      </td>
-                    </ng-container>
-                    <ng-container matColumnDef="breakdown">
-                      <th mat-header-cell *matHeaderCellDef class="breakdown-col">
-                        <div class="metrics-header">
-                          <span>Views</span>
-                          <span>Likes</span>
-                          <span>Saves</span>
-                          <span>Comments</span>
-                          <span>Made it</span>
-                        </div>
-                      </th>
-                      <td mat-cell *matCellDef="let r" class="breakdown-col">
-                        <div class="metrics">
-                          <span>{{ r.views }}</span>
-                          <span>{{ r.likes }}</span>
-                          <span>{{ r.bookmarks }}</span>
-                          <span>{{ r.comments }}</span>
-                          <span class="cook-cell">
-                            {{ r.cooks ?? '—' }}
-                            @if (r.cooks && r.views) {
-                              <span class="cook-rate">{{ cookRate(r.cooks, r.views) }}</span>
-                            }
-                          </span>
-                        </div>
-                      </td>
-                    </ng-container>
-                    <ng-container matColumnDef="total">
-                      <th mat-header-cell *matHeaderCellDef class="total-col">Total</th>
-                      <td mat-cell *matCellDef="let r" class="total-col">{{ r.total_events | number }}</td>
-                    </ng-container>
-                    <tr mat-header-row *matHeaderRowDef="recipeColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: recipeColumns;"></tr>
-                    <tr class="mat-row" *matNoDataRow>
-                      <td class="mat-cell empty-state-cell" colspan="4">No recipe data available.</td>
-                    </tr>
-                  </table>
-                </mat-card-content>
-              </mat-card>
-
-              <!-- Daily chart -->
-              <mat-card class="section-card">
-                <mat-card-header>
-                  <mat-card-title>Daily Events — Last 30 Days</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="chart-wrap">
-                    @for (day of stats()!.daily_events; track day.date) {
-                      <div class="bar-col" [title]="day.date + ': ' + day.total + ' events'">
-                        <div class="bar" [style.height.px]="(day.total / maxDaily()) * 100"></div>
-                        <span class="day-label">{{ day.date | date:'M/d' }}</span>
-                      </div>
-                    }
-                  </div>
-                </mat-card-content>
-              </mat-card>
-            }
+        } @else if (statsError()) {
+          <div class="adm-empty" style="padding:60px;">
+            <div style="font-size:18px; margin-bottom:12px;">Failed to load analytics.</div>
+            <button class="adm-btn primary" (click)="loadStats()">Retry</button>
           </div>
-        </mat-tab>
 
-        <!-- ── Events Log ── -->
-        <mat-tab label="Events Log">
-          <div class="tab-content">
+        } @else if (stats()) {
 
-            <!-- Filters -->
-            <div class="filters-row">
-              <mat-chip-listbox class="type-chips" (change)="onTypeChange($event.value)">
-                <mat-chip-option value="all" [selected]="activeType() === 'all'">All</mat-chip-option>
-                @for (t of eventTypes(); track t) {
-                  <mat-chip-option [value]="t" [selected]="activeType() === t">{{ t }}</mat-chip-option>
+          <!-- Stat cards -->
+          <div class="adm-stats-grid">
+            <div class="adm-stat-card">
+              <div class="adm-stat-row">
+                <div class="adm-stat-label"><div class="adm-stat-icon info">👁</div> Total events</div>
+              </div>
+              <div class="adm-stat-value">{{ fmtNum(stats()!.overall.total_events) }}</div>
+              <div class="adm-stat-foot">All time</div>
+            </div>
+            <div class="adm-stat-card">
+              <div class="adm-stat-row">
+                <div class="adm-stat-label"><div class="adm-stat-icon violet">👥</div> Unique users</div>
+              </div>
+              <div class="adm-stat-value">{{ fmtNum(stats()!.overall.unique_users) }}</div>
+              <div class="adm-stat-foot">Active accounts</div>
+            </div>
+            <div class="adm-stat-card">
+              <div class="adm-stat-row">
+                <div class="adm-stat-label"><div class="adm-stat-icon green">🍴</div> Unique recipes</div>
+              </div>
+              <div class="adm-stat-value">{{ fmtNum(stats()!.overall.unique_recipes) }}</div>
+              <div class="adm-stat-foot">Published</div>
+            </div>
+            <div class="adm-stat-card">
+              <div class="adm-stat-row">
+                <div class="adm-stat-label"><div class="adm-stat-icon warn">📈</div> Events · 24h</div>
+              </div>
+              <div class="adm-stat-value">{{ fmtNum(stats()!.overall.events_last_24h) }}</div>
+              <div class="adm-stat-foot">{{ fmtNum(stats()!.overall.events_last_7d) }} this week</div>
+            </div>
+          </div>
+
+          <!-- Daily chart + Funnel row -->
+          <div class="an-row" style="margin-bottom:16px;">
+            <div class="adm-card" style="flex:2;">
+              <div class="adm-card-head">
+                <div>
+                  <div class="adm-card-title">Daily events — last 30 days</div>
+                </div>
+                <span class="adm-badge neutral">
+                  <span class="dot" style="background:var(--yummy-green);"></span> Events
+                </span>
+              </div>
+              <div class="adm-card-pad">
+                @if (stats()!.daily_events.length) {
+                  <div class="adm-chart-bars">
+                    @for (day of stats()!.daily_events; track day.date) {
+                      <div class="adm-bar-col" [title]="day.date + ': ' + day.total">
+                        <div class="adm-bar" [style.height.%]="(day.total / maxDaily()) * 100"></div>
+                      </div>
+                    }
+                  </div>
+                  <div style="display:flex; justify-content:space-between; margin-top:8px;">
+                    <span class="adm-bar-label">{{ stats()!.daily_events[0].date | date:'MMM d' }}</span>
+                    <span class="adm-bar-label">{{ stats()!.daily_events[stats()!.daily_events.length - 1].date | date:'MMM d' }}</span>
+                  </div>
+                } @else {
+                  <div class="adm-empty">No daily data</div>
                 }
-              </mat-chip-listbox>
-
-              <div class="id-filters">
-                <mat-form-field appearance="outline" class="id-field">
-                  <mat-label>Recipe ID</mat-label>
-                  <input matInput [(ngModel)]="recipeIdValue" (keyup.enter)="applyFilters()" />
-                  @if (recipeIdValue) {
-                    <button matSuffix mat-icon-button type="button" (click)="recipeIdValue = ''; applyFilters()">
-                      <mat-icon>close</mat-icon>
-                    </button>
-                  }
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="id-field">
-                  <mat-label>User ID</mat-label>
-                  <input matInput [(ngModel)]="userIdValue" (keyup.enter)="applyFilters()" />
-                  @if (userIdValue) {
-                    <button matSuffix mat-icon-button type="button" (click)="userIdValue = ''; applyFilters()">
-                      <mat-icon>close</mat-icon>
-                    </button>
-                  }
-                </mat-form-field>
-
-                <button mat-flat-button class="apply-btn" (click)="applyFilters()">Apply</button>
               </div>
             </div>
 
-            <!-- Table -->
-            @if (eventsLoading() && events().length === 0) {
-              <div class="loading-state"><mat-spinner diameter="40" /></div>
-            } @else {
-              <table mat-table [dataSource]="events()" class="full-width">
-                <ng-container matColumnDef="event_type">
-                  <th mat-header-cell *matHeaderCellDef>Type</th>
-                  <td mat-cell *matCellDef="let e">
-                    <span class="type-badge type-badge--{{ e.event_type }}">{{ e.event_type }}</span>
-                  </td>
-                </ng-container>
-                <ng-container matColumnDef="user">
-                  <th mat-header-cell *matHeaderCellDef>User</th>
-                  <td mat-cell *matCellDef="let e">{{ e.user_username ?? '—' }}</td>
-                </ng-container>
-                <ng-container matColumnDef="recipe">
-                  <th mat-header-cell *matHeaderCellDef>Recipe</th>
-                  <td mat-cell *matCellDef="let e">{{ e.recipe_title ?? '—' }}</td>
-                </ng-container>
-                <ng-container matColumnDef="details">
-                  <th mat-header-cell *matHeaderCellDef>Details</th>
-                  <td mat-cell *matCellDef="let e" class="meta">{{ formatMetadata(e.metadata) }}</td>
-                </ng-container>
-                <ng-container matColumnDef="created_at">
-                  <th mat-header-cell *matHeaderCellDef>Date</th>
-                  <td mat-cell *matCellDef="let e" class="date-col">{{ e.created_at | date:'MMM d · HH:mm' }}</td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="eventColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: eventColumns;"></tr>
-                <tr class="mat-row" *matNoDataRow>
-                  <td class="mat-cell empty-state-cell" [attr.colspan]="eventColumns.length">No events found.</td>
-                </tr>
-              </table>
-
-              @if (nextCursor()) {
-                <div class="load-more">
-                  <button mat-stroked-button (click)="loadMore()" [disabled]="eventsLoading()">
-                    @if (eventsLoading()) { <mat-spinner diameter="18" /> } @else { Load More }
-                  </button>
+            @if (signupFunnel().signup) {
+              <div class="adm-card" style="flex:1;">
+                <div class="adm-card-head">
+                  <div class="adm-card-title">Signup funnel</div>
                 </div>
-              }
+                <div class="adm-card-pad">
+                  <div class="funnel-rows">
+                    <div class="funnel-row">
+                      <div style="display:flex; justify-content:space-between;">
+                        <span class="funnel-lbl">Signed up</span>
+                        <span class="funnel-val">{{ signupFunnel().signup!.total | number }}</span>
+                      </div>
+                      <div class="funnel-bar-wrap">
+                        <div class="funnel-bar" style="width:100%; background:var(--ink-900);"></div>
+                      </div>
+                      <div style="font-size:11px; color:var(--ink-400); margin-top:2px;">{{ signupFunnel().signup!.last_24h }} today · {{ signupFunnel().signup!.last_7d }} this week</div>
+                    </div>
+                    @if (signupFunnel().verifyRate !== null) {
+                      <div class="funnel-row">
+                        <div style="display:flex; justify-content:space-between;">
+                          <span class="funnel-lbl">Email verified</span>
+                          <span class="funnel-val">{{ signupFunnel().verifyRate! | number:'1.0-0' }}%</span>
+                        </div>
+                        <div class="funnel-bar-wrap">
+                          <div class="funnel-bar" [style.width.%]="signupFunnel().verifyRate!"></div>
+                        </div>
+                      </div>
+                    }
+                    @if (signupFunnel().onboardingRate !== null) {
+                      <div class="funnel-row">
+                        <div style="display:flex; justify-content:space-between;">
+                          <span class="funnel-lbl">Onboarded</span>
+                          <span class="funnel-val">{{ signupFunnel().onboardingRate! | number:'1.0-0' }}%</span>
+                        </div>
+                        <div class="funnel-bar-wrap">
+                          <div class="funnel-bar" [style.width.%]="signupFunnel().onboardingRate!"></div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
             }
           </div>
-        </mat-tab>
 
-      </mat-tab-group>
+          <!-- Top recipes + Events by type -->
+          <div class="an-row">
+            <div class="adm-card" style="flex:1.4;">
+              <div class="adm-card-head">
+                <div class="adm-card-title">Top recipes</div>
+              </div>
+              <div class="adm-table-wrap">
+                <table class="adm-table">
+                  <thead>
+                    <tr>
+                      <th style="width:32px;">#</th>
+                      <th>Recipe</th>
+                      <th class="adm-text-right" style="width:56px;">👁</th>
+                      <th class="adm-text-right" style="width:56px;">❤️</th>
+                      <th class="adm-text-right" style="width:56px;">🔖</th>
+                      <th class="adm-text-right" style="width:56px;">💬</th>
+                      <th class="adm-text-right" style="width:64px;">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @if (stats()!.top_recipes.length === 0) {
+                      <tr><td colspan="7" class="adm-empty">No recipe data.</td></tr>
+                    }
+                    @for (r of stats()!.top_recipes; track r.recipe_id; let i = $index) {
+                      <tr>
+                        <td class="adm-muted adm-tabular" style="font-size:13px;">{{ i + 1 }}</td>
+                        <td>
+                          <div class="adm-cell-name">
+                            <span class="primary">{{ r.recipe_title }}</span>
+                            <span class="secondary">&#64;{{ r.author_username }}</span>
+                          </div>
+                        </td>
+                        <td class="adm-text-right adm-tabular" style="font-size:12.5px;">{{ fmtNum(r.views) }}</td>
+                        <td class="adm-text-right adm-tabular" style="font-size:12.5px;">{{ fmtNum(r.likes) }}</td>
+                        <td class="adm-text-right adm-tabular" style="font-size:12.5px;">{{ fmtNum(r.bookmarks) }}</td>
+                        <td class="adm-text-right adm-tabular" style="font-size:12.5px;">{{ r.comments }}</td>
+                        <td class="adm-text-right adm-tabular" style="font-weight:700; font-size:13px; color:var(--yummy-green-600);">{{ fmtNum(r.total_events) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="adm-card" style="flex:1;">
+              <div class="adm-card-head"><div class="adm-card-title">Events by type</div></div>
+              <div class="adm-card-pad">
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                  @for (t of stats()!.by_type; track t.event_type) {
+                    <div>
+                      <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span style="font-size:12.5px; font-weight:500; color:var(--ink-700);">{{ t.event_type }}</span>
+                        <span style="font-size:12.5px; font-weight:700; font-feature-settings:'tnum';">{{ fmtNum(t.total) }}</span>
+                      </div>
+                      <div style="height:6px; background:var(--canvas); border-radius:4px; overflow:hidden;">
+                        <div [style.width.%]="(t.total / maxByType()) * 100"
+                             [style.background]="eventColor(t.event_type)"
+                             style="height:100%; border-radius:4px;"></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feed CTR -->
+          @if (feedCtr()) {
+            <div class="adm-card" style="margin-top:16px;">
+              <div class="adm-card-head"><div class="adm-card-title">Feed CTR</div></div>
+              <div class="adm-card-pad">
+                <div class="ctr-row">
+                  <div class="ctr-stat">
+                    <div class="ctr-val">{{ feedCtr()!.impressions.total | number }}</div>
+                    <div class="ctr-lbl">Impressions</div>
+                    <div class="ctr-sub">{{ feedCtr()!.impressions.last_24h }} today</div>
+                  </div>
+                  <div class="ctr-stat">
+                    <div class="ctr-val">{{ feedCtr()!.taps?.total | number }}</div>
+                    <div class="ctr-lbl">Taps</div>
+                    <div class="ctr-sub">{{ feedCtr()!.taps?.last_24h ?? 0 }} today</div>
+                  </div>
+                  <div class="ctr-stat ctr-highlight">
+                    <div class="ctr-val">{{ feedCtr()!.ctr | number:'1.1-1' }}%</div>
+                    <div class="ctr-lbl">CTR</div>
+                    <div class="ctr-sub">taps ÷ impressions</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        }
+      }
+
+      <!-- ════════════════════ EVENTS LOG TAB ════════════════════ -->
+      @if (activeTab() === 'events') {
+
+        <!-- Type filter chips -->
+        <div class="adm-chips" style="margin-bottom:12px; flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px;">
+          <button class="adm-chip" [class.active]="activeType() === 'all'" (click)="onTypeChange('all')" style="flex-shrink:0;">
+            All
+          </button>
+          @for (t of eventTypes(); track t) {
+            <button class="adm-chip" [class.active]="activeType() === t" (click)="onTypeChange(t)" style="flex-shrink:0; text-transform:capitalize;">
+              {{ t }}
+            </button>
+          }
+        </div>
+
+        <!-- ID filters -->
+        <div class="id-filters" style="margin-bottom:16px;">
+          <mat-form-field appearance="outline" class="id-field">
+            <mat-label>Recipe ID</mat-label>
+            <input matInput [(ngModel)]="recipeIdValue" (keyup.enter)="applyFilters()" />
+            @if (recipeIdValue) {
+              <button matSuffix mat-icon-button type="button" (click)="recipeIdValue = ''; applyFilters()">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="id-field">
+            <mat-label>User ID</mat-label>
+            <input matInput [(ngModel)]="userIdValue" (keyup.enter)="applyFilters()" />
+            @if (userIdValue) {
+              <button matSuffix mat-icon-button type="button" (click)="userIdValue = ''; applyFilters()">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+
+          <button class="adm-btn primary" (click)="applyFilters()">Apply</button>
+        </div>
+
+        <!-- Events table -->
+        @if (eventsLoading() && events().length === 0) {
+          <div class="adm-loading"><mat-spinner diameter="40" /></div>
+        } @else {
+          <div class="adm-card">
+            <div class="adm-table-wrap">
+              <table class="adm-table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>User</th>
+                    <th>Recipe</th>
+                    <th>Details</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (events().length === 0) {
+                    <tr><td colspan="5" class="adm-empty">No events found.</td></tr>
+                  }
+                  @for (e of events(); track e.id) {
+                    <tr>
+                      <td>
+                        <span class="ev-badge ev-{{ e.event_type }}">{{ e.event_type }}</span>
+                      </td>
+                      <td class="adm-muted" style="font-size:13px;">{{ e.user_username ?? '—' }}</td>
+                      <td class="adm-muted recipe-title-cell" style="font-size:13px;">{{ e.recipe_title ?? '—' }}</td>
+                      <td class="adm-muted" style="font-size:12px; font-style:italic;">{{ formatMetadata(e.metadata) }}</td>
+                      <td class="adm-muted" style="white-space:nowrap; font-size:12px;">{{ e.created_at | date:'MMM d · HH:mm' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <div class="adm-load-more">
+              @if (nextCursor()) {
+                <button class="adm-btn outline" (click)="loadMore()" [disabled]="eventsLoading()">
+                  @if (eventsLoading()) { <mat-spinner diameter="16" /> } @else { Load more }
+                </button>
+              }
+            </div>
+          </div>
+        }
+      }
+
     </div>
   `,
   styles: [`
-    .analytics-page { padding: 24px; max-width: 1100px; }
-    .page-title { font-size: 22px; font-weight: 500; margin: 0 0 20px; color: #212121; }
-    .tab-content { padding: 20px 0; }
-
-    /* Summary cards */
-    .stat-cards { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-    .stat-card {
-      flex: 1; min-width: 140px; padding: 20px 16px;
-      display: flex; flex-direction: column; align-items: center; text-align: center;
+    /* Analytics 2-col rows */
+    .an-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: flex-start;
     }
-    .stat-icon { font-size: 32px; width: 32px; height: 32px; color: #53B175; margin-bottom: 8px; }
-    .stat-value { font-size: 28px; font-weight: 700; color: #212121; line-height: 1; }
-    .stat-label { font-size: 11px; color: #757575; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    /* Section cards */
-    .section-card { margin-bottom: 20px; }
-
-    /* Events by type grid */
-    .type-grid { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 8px; }
-    .type-item {
-      background: #f5f5f5; border-radius: 8px; padding: 12px 20px;
-      min-width: 110px; text-align: center;
+    @media (max-width: 900px) {
+      .an-row { flex-direction: column; }
+      .an-row > * { flex: none !important; width: 100%; }
     }
-    .type-count { font-size: 22px; font-weight: 700; color: #53B175; }
-    .type-name { font-size: 11px; color: #444; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-    .type-sub { font-size: 10px; color: #999; margin-top: 4px; }
 
-    /* Top recipes table */
-    .rank-col { width: 40px; color: #999; }
-    .recipe-title { font-weight: 500; font-size: 13px; }
-    .recipe-author { font-size: 11px; color: #999; }
-    .breakdown-col { width: 300px; }
-    .metrics, .metrics-header {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      text-align: center;
-    }
-    .metrics-header span { font-size: 11px; color: #9e9e9e; font-weight: 500; }
-    .metrics span { font-size: 13px; color: #444; }
-    .cook-cell { display: flex; flex-direction: column; align-items: center; }
-    .cook-rate { font-size: 10px; color: #53B175; line-height: 1; margin-top: 1px; }
-    .total-col { width: 70px; font-weight: 600; color: #53B175; }
-
-    /* Daily chart */
-    .chart-wrap {
-      display: flex; align-items: flex-end; gap: 3px;
-      height: 120px; padding-bottom: 20px;
-    }
-    .bar-col {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: flex-end; height: 100%;
-    }
-    .bar {
-      width: 100%; background: #53B175; border-radius: 2px 2px 0 0;
-      min-height: 2px; transition: height 0.2s;
-    }
-    .day-label { font-size: 8px; color: #bbb; margin-top: 3px; }
-
-    /* Events log */
-    .filters-row { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
-    .id-filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .id-field { max-width: 220px; }
-    .apply-btn { height: 40px; background: #53B175 !important; color: #fff !important; }
-
-    /* Type badges */
-    .type-badge {
-      border-radius: 4px; padding: 2px 8px; font-size: 12px; font-weight: 500;
-      background: #e8f5e9; color: #2e7d32;
-    }
-    .type-badge--view    { background: #e3f2fd; color: #1565c0; }
-    .type-badge--like    { background: #fce4ec; color: #880e4f; }
-    .type-badge--comment { background: #fff3e0; color: #e65100; }
-    .type-badge--bookmark { background: #f3e5f5; color: #6a1b9a; }
-    .type-badge--search  { background: #e8eaf6; color: #283593; }
-
-    .meta { font-size: 12px; color: #777; font-style: italic; }
-    .date-col { white-space: nowrap; font-size: 12px; color: #666; }
-
-    /* States */
-    .loading-state { display: flex; justify-content: center; padding: 60px 0; }
-    .empty-state {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 60px 0; color: #9e9e9e; gap: 8px;
-    }
-    .empty-state mat-icon { font-size: 48px; width: 48px; height: 48px; }
-    .empty-state-cell { text-align: center; padding: 40px !important; color: #9e9e9e; }
-
-    /* Load more */
-    .load-more { display: flex; justify-content: center; padding: 20px 0; }
-
-    .full-width { width: 100%; }
-
-    /* Signup funnel */
-    .funnel-flow { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-top: 8px; }
-    .funnel-step { display: flex; flex-direction: column; align-items: center; text-align: center; }
-    .funnel-step--main { background: #f5f5f5; border-radius: 8px; padding: 14px 24px; }
-    .funnel-count { font-size: 26px; font-weight: 700; color: #212121; line-height: 1; }
-    .funnel-pct { font-size: 26px; font-weight: 700; color: #53B175; line-height: 1; }
-    .funnel-step-label { font-size: 11px; color: #757575; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .funnel-step-sub { font-size: 11px; color: #9e9e9e; margin-top: 3px; }
-    .funnel-arrow { font-size: 22px; color: #bdbdbd; line-height: 1; }
+    /* Funnel bars */
+    .funnel-rows { display: flex; flex-direction: column; gap: 12px; }
+    .funnel-row { display: flex; flex-direction: column; gap: 4px; }
+    .funnel-lbl { font-size: 12.5px; font-weight: 600; color: var(--ink-700); font-family: var(--font-admin); }
+    .funnel-val { font-size: 13px; font-weight: 700; font-family: var(--font-admin); }
+    .funnel-bar-wrap { height: 6px; background: var(--canvas); border-radius: 4px; overflow: hidden; }
+    .funnel-bar { height: 100%; background: var(--yummy-green); border-radius: 4px; }
 
     /* Feed CTR */
-    .ctr-row { display: flex; gap: 0; padding-top: 8px; }
-    .ctr-stat { flex: 1; text-align: center; padding: 12px 16px; border-right: 1px solid #f0f0f0; }
+    .ctr-row { display: flex; gap: 0; }
+    .ctr-stat {
+      flex: 1;
+      text-align: center;
+      padding: 12px 16px;
+      border-right: 1px solid var(--border);
+    }
     .ctr-stat:last-child { border-right: none; }
-    .ctr-stat--highlight .ctr-value { color: #53B175; }
-    .ctr-value { font-size: 26px; font-weight: 700; color: #212121; line-height: 1; }
-    .ctr-label { font-size: 11px; color: #757575; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .ctr-sub { font-size: 11px; color: #9e9e9e; margin-top: 3px; }
+    .ctr-val { font-size: 26px; font-weight: 700; color: var(--ink-900); line-height: 1; font-family: var(--font-admin); }
+    .ctr-lbl { font-size: 11px; color: var(--ink-500); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+    .ctr-sub { font-size: 11px; color: var(--ink-400); margin-top: 3px; }
+    .ctr-highlight .ctr-val { color: var(--yummy-green-600); }
+
+    /* Event type badges */
+    .ev-badge {
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--success-bg);
+      color: var(--success);
+      font-family: var(--font-admin);
+      white-space: nowrap;
+    }
+    .ev-view     { background: var(--info-bg);   color: var(--info); }
+    .ev-like     { background: #fce4ec;           color: #880e4f; }
+    .ev-comment  { background: var(--warn-bg);    color: var(--warn); }
+    .ev-bookmark { background: var(--violet-bg);  color: var(--violet); }
+    .ev-search   { background: #e8eaf6;           color: #283593; }
+
+    /* ID filters row */
+    .id-filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .id-field { max-width: 200px; }
+
+    /* Recipe title cell in events */
+    .recipe-title-cell {
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   `],
 })
 export class AnalyticsComponent implements OnInit {
   private api = inject(ApiService);
+  fmtNum = fmtNum;
+
+  activeTab = signal<ActiveTab>('overview');
 
   stats = signal<AnalyticsStats | null>(null);
   statsLoading = signal(false);
@@ -437,14 +445,16 @@ export class AnalyticsComponent implements OnInit {
   recipeIdValue = '';
   userIdValue = '';
 
-  recipeColumns = ['rank', 'title', 'breakdown', 'total'];
-  eventColumns = ['event_type', 'user', 'recipe', 'details', 'created_at'];
-
   eventTypes = computed(() => (this.stats()?.by_type ?? []).map(e => e.event_type));
 
   maxDaily = computed(() => {
     const days = this.stats()?.daily_events ?? [];
     return Math.max(...days.map(d => d.total), 1);
+  });
+
+  maxByType = computed(() => {
+    const bt = this.stats()?.by_type ?? [];
+    return Math.max(...bt.map(t => t.total), 1);
   });
 
   signupFunnel = computed(() => {
@@ -456,8 +466,6 @@ export class AnalyticsComponent implements OnInit {
     const total = signup?.total ?? 0;
     return {
       signup,
-      verify,
-      onboarding,
       verifyRate: total > 0 && verify ? (verify.total / total) * 100 : null,
       onboardingRate: total > 0 && onboarding ? (onboarding.total / total) * 100 : null,
     };
@@ -488,10 +496,7 @@ export class AnalyticsComponent implements OnInit {
 
   loadEvents(append = false) {
     this.eventsLoading.set(true);
-    if (!append) {
-      this.events.set([]);
-      this.nextCursor.set(null);
-    }
+    if (!append) { this.events.set([]); this.nextCursor.set(null); }
     this.api.getAnalyticsEvents({
       cursor: append ? (this.nextCursor() ?? undefined) : undefined,
       event_type: this.activeType() !== 'all' ? this.activeType() : undefined,
@@ -507,23 +512,12 @@ export class AnalyticsComponent implements OnInit {
     });
   }
 
-  onTypeChange(value: string) {
-    this.activeType.set(value ?? 'all');
-    this.loadEvents();
-  }
+  onTypeChange(value: string) { this.activeType.set(value); this.loadEvents(); }
+  applyFilters() { this.loadEvents(); }
+  loadMore() { if (!this.nextCursor()) return; this.loadEvents(true); }
 
-  applyFilters() {
-    this.loadEvents();
-  }
-
-  loadMore() {
-    if (!this.nextCursor()) return;
-    this.loadEvents(true);
-  }
-
-  cookRate(cooks: number | undefined, views: number): string {
-    if (!cooks || !views) return '';
-    return `${Math.round((cooks / views) * 100)}%`;
+  eventColor(type: string): string {
+    return EVENT_COLORS[type] ?? 'var(--yummy-green)';
   }
 
   formatMetadata(raw: string | null): string {

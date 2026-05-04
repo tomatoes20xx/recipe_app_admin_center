@@ -22,7 +22,13 @@ export const routes: Routes = [
         canActivate: [authGuard],
         title: 'Yummy Admin',
         children: [
-          { path: '', redirectTo: 'reports', pathMatch: 'full' },
+          { path: '', redirectTo: 'overview', pathMatch: 'full' },
+          {
+            path: 'overview',
+            title: 'Overview · Yummy Admin',
+            loadComponent: () =>
+              import('./features/overview/overview.component').then((m) => m.OverviewComponent),
+          },
           {
             path: 'reports',
             title: 'Reports · Yummy Admin',

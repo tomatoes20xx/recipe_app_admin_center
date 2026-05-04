@@ -36,3 +36,469 @@ body {
   height: 100%;
 }
 /* You can add global styles to this file, and also import other style files */
+
+/* ─── Yummy Admin Design Tokens ─── */
+:root {
+  --yummy-green: #53B175;
+  --yummy-green-600: #3F9C61;
+  --yummy-green-50: #EAF6EF;
+  --yummy-green-100: #D6EEDD;
+
+  --surface: #FFFFFF;
+  --canvas: #F6F7F9;
+  --rail: #FFFFFF;
+  --border: #E7E9EE;
+  --border-strong: #D6D9E0;
+  --hover: #F1F3F6;
+
+  --ink-900: #15181D;
+  --ink-700: #2E333B;
+  --ink-500: #5A6270;
+  --ink-400: #818995;
+  --ink-300: #A6ACB6;
+
+  --danger: #D9362B;
+  --danger-bg: #FDECEA;
+  --warn: #C76A00;
+  --warn-bg: #FFF1DF;
+  --info: #1F6FEB;
+  --info-bg: #E6EFFD;
+  --success: #1B8A4A;
+  --success-bg: #E4F5EC;
+  --violet: #6A39B5;
+  --violet-bg: #EFE7FA;
+
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+
+  --shadow-sm: 0 1px 2px rgba(15,23,42,0.04), 0 1px 1px rgba(15,23,42,0.03);
+  --shadow-md: 0 6px 18px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+
+  --font-admin: 'Inter', 'Roboto', -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* Shared admin page layout utilities (used across all feature components) */
+.adm-page {
+  padding: 28px;
+  font-family: var(--font-admin);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.005em;
+  color: var(--ink-900);
+}
+
+.adm-page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.adm-page-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink-900);
+  font-family: var(--font-admin);
+}
+
+.adm-page-sub {
+  color: var(--ink-500);
+  font-size: 13.5px;
+  margin-top: 4px;
+  font-family: var(--font-admin);
+}
+
+.adm-hstack {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Admin card */
+.adm-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.adm-card-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.adm-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-900);
+  font-family: var(--font-admin);
+}
+
+.adm-card-sub {
+  font-size: 12px;
+  color: var(--ink-500);
+  margin-top: 2px;
+  font-family: var(--font-admin);
+}
+
+.adm-card-pad {
+  padding: 18px 20px;
+}
+
+/* Admin buttons */
+.adm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: var(--surface);
+  color: var(--ink-700);
+  font-family: var(--font-admin);
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s;
+  line-height: 1;
+}
+
+.adm-btn:hover { background: var(--hover); }
+
+.adm-btn.primary {
+  background: var(--yummy-green);
+  color: white;
+  border-color: var(--yummy-green);
+}
+
+.adm-btn.primary:hover {
+  background: var(--yummy-green-600);
+  border-color: var(--yummy-green-600);
+}
+
+.adm-btn.outline { border-color: var(--border-strong); }
+.adm-btn.outline:hover { background: var(--hover); }
+
+.adm-btn.danger { color: var(--danger); border-color: var(--border-strong); }
+.adm-btn.danger:hover { background: var(--danger-bg); border-color: var(--danger); }
+
+.adm-btn.ghost { background: transparent; border-color: transparent; }
+.adm-btn.ghost:hover { background: var(--hover); }
+
+.adm-btn.sm { padding: 5px 10px; font-size: 12px; border-radius: 7px; }
+.adm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Admin chips */
+.adm-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.adm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-700);
+  cursor: pointer;
+  font-family: var(--font-admin);
+  transition: background 0.12s;
+}
+
+.adm-chip:hover { background: var(--hover); }
+
+.adm-chip.active {
+  background: var(--ink-900);
+  color: white;
+  border-color: var(--ink-900);
+}
+
+.adm-chip .chip-count {
+  font-size: 11px;
+  background: rgba(0,0,0,0.07);
+  padding: 0 5px;
+  border-radius: 99px;
+  font-weight: 600;
+}
+
+.adm-chip.active .chip-count { background: rgba(255,255,255,0.18); }
+
+/* Admin table */
+.adm-table-wrap { overflow-x: auto; }
+
+.adm-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  font-family: var(--font-admin);
+}
+
+.adm-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-400);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+.adm-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--ink-700);
+}
+
+.adm-table tr:last-child td { border-bottom: none; }
+.adm-table tbody tr:hover td { background: var(--hover); }
+
+/* Badges */
+.adm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  font-family: var(--font-admin);
+}
+
+.adm-badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.adm-badge.recipe   { background: var(--info-bg);    color: var(--info); }
+.adm-badge.comment  { background: var(--violet-bg);  color: var(--violet); }
+.adm-badge.user     { background: var(--warn-bg);    color: var(--warn); }
+.adm-badge.active   { background: var(--success-bg); color: var(--success); }
+.adm-badge.soft     { background: var(--warn-bg);    color: var(--warn); }
+.adm-badge.banned   { background: var(--danger-bg);  color: var(--danger); }
+.adm-badge.neutral  { background: var(--hover);      color: var(--ink-500); }
+
+/* Stat cards grid */
+.adm-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+@media (max-width: 900px) {
+  .adm-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .adm-stats-grid { grid-template-columns: 1fr; }
+  .adm-page { padding: 16px; }
+}
+
+.adm-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+}
+
+.adm-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.adm-stat-label {
+  font-size: 12px;
+  color: var(--ink-500);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-admin);
+}
+
+.adm-stat-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 15px;
+}
+
+.adm-stat-icon.info    { background: var(--info-bg);    color: var(--info); }
+.adm-stat-icon.warn    { background: var(--warn-bg);    color: var(--warn); }
+.adm-stat-icon.danger  { background: var(--danger-bg);  color: var(--danger); }
+.adm-stat-icon.success { background: var(--success-bg); color: var(--success); }
+.adm-stat-icon.violet  { background: var(--violet-bg);  color: var(--violet); }
+.adm-stat-icon.green   { background: var(--yummy-green-50); color: var(--yummy-green-600); }
+
+.adm-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-feature-settings: 'tnum';
+  color: var(--ink-900);
+  font-family: var(--font-admin);
+  line-height: 1.1;
+}
+
+.adm-stat-delta {
+  font-size: 11.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-family: var(--font-admin);
+}
+
+.adm-stat-delta.up   { background: var(--success-bg); color: var(--success); }
+.adm-stat-delta.down { background: var(--danger-bg);  color: var(--danger); }
+
+.adm-stat-foot {
+  font-size: 11.5px;
+  color: var(--ink-400);
+  margin-top: 4px;
+  font-family: var(--font-admin);
+}
+
+/* Bar chart */
+.adm-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 120px;
+}
+
+.adm-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.adm-bar {
+  width: 100%;
+  background: linear-gradient(180deg, var(--yummy-green) 0%, var(--yummy-green-600) 100%);
+  border-radius: 3px 3px 0 0;
+  min-height: 2px;
+}
+
+.adm-bar-label {
+  font-size: 9px;
+  color: var(--ink-400);
+  margin-top: 4px;
+  font-family: var(--font-admin);
+}
+
+/* User cell */
+.adm-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adm-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFD37A, #FF9054);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-family: var(--font-admin);
+}
+
+.adm-cell-name { display: flex; flex-direction: column; line-height: 1.3; }
+.adm-cell-name .primary { font-weight: 600; color: var(--ink-900); font-size: 13px; }
+.adm-cell-name .secondary { font-size: 11.5px; color: var(--ink-400); }
+
+/* Segmented tabs */
+.adm-tabs {
+  display: inline-flex;
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 3px;
+  gap: 2px;
+}
+
+.adm-tab {
+  padding: 7px 14px;
+  border-radius: 7px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-500);
+  cursor: pointer;
+  font-family: var(--font-admin);
+  transition: background 0.12s;
+}
+
+.adm-tab.active {
+  background: var(--surface);
+  color: var(--ink-900);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Loading / empty states */
+.adm-loading {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.adm-empty {
+  text-align: center;
+  padding: 48px;
+  color: var(--ink-400);
+  font-size: 14px;
+  font-family: var(--font-admin);
+}
+
+.adm-load-more {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* Text utilities */
+.adm-muted { color: var(--ink-400) !important; }
+.adm-tabular { font-feature-settings: 'tnum'; }
+.adm-text-right { text-align: right; }
