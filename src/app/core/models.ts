@@ -104,6 +104,7 @@ export interface AnalyticsTopRecipe {
   likes: number;
   bookmarks: number;
   comments: number;
+  cooks?: number;
 }
 
 export interface AnalyticsDailyBreakdown {

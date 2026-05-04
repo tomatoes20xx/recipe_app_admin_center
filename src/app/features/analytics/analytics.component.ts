@@ -73,6 +73,62 @@ import { AnalyticsStats, AnalyticsEvent } from '../../core/models';
                 </mat-card>
               </div>
 
+              <!-- Signup funnel -->
+              @if (signupFunnel().signup) {
+                <mat-card class="section-card">
+                  <mat-card-header><mat-card-title>Signup Funnel</mat-card-title></mat-card-header>
+                  <mat-card-content>
+                    <div class="funnel-flow">
+                      <div class="funnel-step funnel-step--main">
+                        <div class="funnel-count">{{ signupFunnel().signup!.total | number }}</div>
+                        <div class="funnel-step-label">Signups</div>
+                        <div class="funnel-step-sub">{{ signupFunnel().signup!.last_24h }} today · {{ signupFunnel().signup!.last_7d }} this week</div>
+                      </div>
+                      @if (signupFunnel().verifyRate !== null) {
+                        <div class="funnel-arrow">›</div>
+                        <div class="funnel-step">
+                          <div class="funnel-pct">{{ signupFunnel().verifyRate! | number:'1.1-1' }}%</div>
+                          <div class="funnel-step-label">Email Verified</div>
+                        </div>
+                      }
+                      @if (signupFunnel().onboardingRate !== null) {
+                        <div class="funnel-arrow">›</div>
+                        <div class="funnel-step">
+                          <div class="funnel-pct">{{ signupFunnel().onboardingRate! | number:'1.1-1' }}%</div>
+                          <div class="funnel-step-label">Onboarded</div>
+                        </div>
+                      }
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              }
+
+              <!-- Feed CTR -->
+              @if (feedCtr()) {
+                <mat-card class="section-card">
+                  <mat-card-header><mat-card-title>Feed CTR</mat-card-title></mat-card-header>
+                  <mat-card-content>
+                    <div class="ctr-row">
+                      <div class="ctr-stat">
+                        <div class="ctr-value">{{ feedCtr()!.impressions.total | number }}</div>
+                        <div class="ctr-label">Impressions</div>
+                        <div class="ctr-sub">{{ feedCtr()!.impressions.last_24h }} today · {{ feedCtr()!.impressions.last_7d }} this week</div>
+                      </div>
+                      <div class="ctr-stat">
+                        <div class="ctr-value">{{ feedCtr()!.taps?.total | number }}</div>
+                        <div class="ctr-label">Taps</div>
+                        <div class="ctr-sub">{{ feedCtr()!.taps?.last_24h ?? 0 }} today · {{ feedCtr()!.taps?.last_7d ?? 0 }} this week</div>
+                      </div>
+                      <div class="ctr-stat ctr-stat--highlight">
+                        <div class="ctr-value">{{ feedCtr()!.ctr | number:'1.1-1' }}%</div>
+                        <div class="ctr-label">CTR</div>
+                        <div class="ctr-sub">taps ÷ impressions</div>
+                      </div>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              }
+
               <!-- Events by type -->
               <mat-card class="section-card">
                 <mat-card-header>
@@ -116,6 +172,7 @@ import { AnalyticsStats, AnalyticsEvent } from '../../core/models';
                           <span>Likes</span>
                           <span>Saves</span>
                           <span>Comments</span>
+                          <span>Made it</span>
                         </div>
                       </th>
                       <td mat-cell *matCellDef="let r" class="breakdown-col">
@@ -124,6 +181,12 @@ import { AnalyticsStats, AnalyticsEvent } from '../../core/models';
                           <span>{{ r.likes }}</span>
                           <span>{{ r.bookmarks }}</span>
                           <span>{{ r.comments }}</span>
+                          <span class="cook-cell">
+                            {{ r.cooks ?? '—' }}
+                            @if (r.cooks && r.views) {
+                              <span class="cook-rate">{{ cookRate(r.cooks, r.views) }}</span>
+                            }
+                          </span>
                         </div>
                       </td>
                     </ng-container>
@@ -278,14 +341,16 @@ import { AnalyticsStats, AnalyticsEvent } from '../../core/models';
     .rank-col { width: 40px; color: #999; }
     .recipe-title { font-weight: 500; font-size: 13px; }
     .recipe-author { font-size: 11px; color: #999; }
-    .breakdown-col { width: 240px; }
+    .breakdown-col { width: 300px; }
     .metrics, .metrics-header {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       text-align: center;
     }
     .metrics-header span { font-size: 11px; color: #9e9e9e; font-weight: 500; }
     .metrics span { font-size: 13px; color: #444; }
+    .cook-cell { display: flex; flex-direction: column; align-items: center; }
+    .cook-rate { font-size: 10px; color: #53B175; line-height: 1; margin-top: 1px; }
     .total-col { width: 70px; font-weight: 600; color: #53B175; }
 
     /* Daily chart */
@@ -336,6 +401,25 @@ import { AnalyticsStats, AnalyticsEvent } from '../../core/models';
     .load-more { display: flex; justify-content: center; padding: 20px 0; }
 
     .full-width { width: 100%; }
+
+    /* Signup funnel */
+    .funnel-flow { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-top: 8px; }
+    .funnel-step { display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .funnel-step--main { background: #f5f5f5; border-radius: 8px; padding: 14px 24px; }
+    .funnel-count { font-size: 26px; font-weight: 700; color: #212121; line-height: 1; }
+    .funnel-pct { font-size: 26px; font-weight: 700; color: #53B175; line-height: 1; }
+    .funnel-step-label { font-size: 11px; color: #757575; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .funnel-step-sub { font-size: 11px; color: #9e9e9e; margin-top: 3px; }
+    .funnel-arrow { font-size: 22px; color: #bdbdbd; line-height: 1; }
+
+    /* Feed CTR */
+    .ctr-row { display: flex; gap: 0; padding-top: 8px; }
+    .ctr-stat { flex: 1; text-align: center; padding: 12px 16px; border-right: 1px solid #f0f0f0; }
+    .ctr-stat:last-child { border-right: none; }
+    .ctr-stat--highlight .ctr-value { color: #53B175; }
+    .ctr-value { font-size: 26px; font-weight: 700; color: #212121; line-height: 1; }
+    .ctr-label { font-size: 11px; color: #757575; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .ctr-sub { font-size: 11px; color: #9e9e9e; margin-top: 3px; }
   `],
 })
 export class AnalyticsComponent implements OnInit {
@@ -361,6 +445,31 @@ export class AnalyticsComponent implements OnInit {
   maxDaily = computed(() => {
     const days = this.stats()?.daily_events ?? [];
     return Math.max(...days.map(d => d.total), 1);
+  });
+
+  signupFunnel = computed(() => {
+    const bt = this.stats()?.by_type ?? [];
+    const find = (t: string) => bt.find(e => e.event_type === t) ?? null;
+    const signup = find('signup_complete');
+    const verify = find('email_verify_complete');
+    const onboarding = find('onboarding_complete');
+    const total = signup?.total ?? 0;
+    return {
+      signup,
+      verify,
+      onboarding,
+      verifyRate: total > 0 && verify ? (verify.total / total) * 100 : null,
+      onboardingRate: total > 0 && onboarding ? (onboarding.total / total) * 100 : null,
+    };
+  });
+
+  feedCtr = computed(() => {
+    const bt = this.stats()?.by_type ?? [];
+    const impressions = bt.find(e => e.event_type === 'feed_card_impression') ?? null;
+    const taps = bt.find(e => e.event_type === 'feed_card_tap') ?? null;
+    if (!impressions) return null;
+    const ctr = impressions.total > 0 && taps ? (taps.total / impressions.total) * 100 : 0;
+    return { impressions, taps, ctr };
   });
 
   ngOnInit() {
@@ -410,6 +519,11 @@ export class AnalyticsComponent implements OnInit {
   loadMore() {
     if (!this.nextCursor()) return;
     this.loadEvents(true);
+  }
+
+  cookRate(cooks: number | undefined, views: number): string {
+    if (!cooks || !views) return '';
+    return `${Math.round((cooks / views) * 100)}%`;
   }
 
   formatMetadata(raw: string | null): string {
