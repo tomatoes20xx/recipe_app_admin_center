@@ -116,11 +116,18 @@ export interface AnalyticsDailyBreakdown {
   comments: number;
 }
 
+export interface AnalyticsPlatforms {
+  ios: number;
+  android: number;
+  unknown: number;
+}
+
 export interface AnalyticsStats {
   overall: AnalyticsOverall;
   by_type: AnalyticsByType[];
   top_recipes: AnalyticsTopRecipe[];
   daily_events: AnalyticsDailyBreakdown[];
+  platforms: AnalyticsPlatforms;
 }
 
 export interface AnalyticsEvent {
