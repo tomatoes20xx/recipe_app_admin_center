@@ -272,6 +272,55 @@ const EVENT_COLORS: Record<string, string> = {
               </div>
             </div>
           }
+
+          <!-- Platform breakdown -->
+          @if (platformBreakdown()) {
+            <div class="adm-card" style="margin-top:16px;">
+              <div class="adm-card-head">
+                <div class="adm-card-title">Platform breakdown</div>
+                <span style="font-size:12px; color:var(--ink-400);">{{ platformBreakdown()!.total | number }} registered users</span>
+              </div>
+              <div class="adm-card-pad">
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                  <div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                      <span style="font-size:12.5px; font-weight:600; color:var(--ink-700);">🍎 iOS</span>
+                      <span style="font-size:12.5px; font-weight:700; font-feature-settings:'tnum';">
+                        {{ platformBreakdown()!.ios | number }} <span style="color:var(--ink-400); font-weight:400;">({{ platformBreakdown()!.iosPct | number:'1.0-0' }}%)</span>
+                      </span>
+                    </div>
+                    <div style="height:6px; background:var(--canvas); border-radius:4px; overflow:hidden;">
+                      <div [style.width.%]="platformBreakdown()!.iosPct" style="height:100%; background:#555; border-radius:4px;"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                      <span style="font-size:12.5px; font-weight:600; color:var(--ink-700);">🤖 Android</span>
+                      <span style="font-size:12.5px; font-weight:700; font-feature-settings:'tnum';">
+                        {{ platformBreakdown()!.android | number }} <span style="color:var(--ink-400); font-weight:400;">({{ platformBreakdown()!.androidPct | number:'1.0-0' }}%)</span>
+                      </span>
+                    </div>
+                    <div style="height:6px; background:var(--canvas); border-radius:4px; overflow:hidden;">
+                      <div [style.width.%]="platformBreakdown()!.androidPct" style="height:100%; background:var(--yummy-green); border-radius:4px;"></div>
+                    </div>
+                  </div>
+                  @if (platformBreakdown()!.unknown > 0) {
+                    <div>
+                      <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="font-size:12.5px; font-weight:600; color:var(--ink-400);">Unknown</span>
+                        <span style="font-size:12.5px; font-weight:700; font-feature-settings:'tnum'; color:var(--ink-400);">
+                          {{ platformBreakdown()!.unknown | number }} ({{ platformBreakdown()!.unknownPct | number:'1.0-0' }}%)
+                        </span>
+                      </div>
+                      <div style="height:6px; background:var(--canvas); border-radius:4px; overflow:hidden;">
+                        <div [style.width.%]="platformBreakdown()!.unknownPct" style="height:100%; background:var(--ink-300); border-radius:4px;"></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
         }
       }
 
@@ -478,6 +527,21 @@ export class AnalyticsComponent implements OnInit {
     if (!impressions) return null;
     const ctr = impressions.total > 0 && taps ? (taps.total / impressions.total) * 100 : 0;
     return { impressions, taps, ctr };
+  });
+
+  platformBreakdown = computed(() => {
+    const p = this.stats()?.platforms;
+    if (!p) return null;
+    const total = p.ios + p.android + p.unknown;
+    return {
+      ios: p.ios,
+      android: p.android,
+      unknown: p.unknown,
+      total,
+      iosPct: total > 0 ? (p.ios / total) * 100 : 0,
+      androidPct: total > 0 ? (p.android / total) * 100 : 0,
+      unknownPct: total > 0 ? (p.unknown / total) * 100 : 0,
+    };
   });
 
   ngOnInit() {
