@@ -7,9 +7,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ApiService } from '../../core/api.service';
-import { AnalyticsStats, AnalyticsEvent } from '../../core/models';
+import { AnalyticsStats, AnalyticsEvent, AnalyticsRetentionResponse, AnalyticsFunnel } from '../../core/models';
 
-type ActiveTab = 'overview' | 'events';
+type ActiveTab = 'overview' | 'events' | 'retention';
 
 function fmtNum(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
@@ -56,8 +56,9 @@ const EVENT_COLORS: Record<string, string> = {
 
       <!-- ── Tabs ── -->
       <div class="adm-tabs" style="margin-bottom:22px;">
-        <button class="adm-tab" [class.active]="activeTab() === 'overview'" (click)="activeTab.set('overview')">Overview</button>
-        <button class="adm-tab" [class.active]="activeTab() === 'events'"   (click)="activeTab.set('events')">Events log</button>
+        <button class="adm-tab" [class.active]="activeTab() === 'overview'"   (click)="activeTab.set('overview')">Overview</button>
+        <button class="adm-tab" [class.active]="activeTab() === 'retention'" (click)="activeTab.set('retention')">Retention</button>
+        <button class="adm-tab" [class.active]="activeTab() === 'events'"    (click)="activeTab.set('events')">Events log</button>
       </div>
 
       <!-- ════════════════════ OVERVIEW TAB ════════════════════ -->
@@ -324,6 +325,105 @@ const EVENT_COLORS: Record<string, string> = {
         }
       }
 
+      <!-- ════════════════════ RETENTION TAB ════════════════════ -->
+      @if (activeTab() === 'retention') {
+
+        @if (retentionLoading() || funnelLoading()) {
+          <div class="adm-loading" style="height:200px;"><mat-spinner diameter="48" /></div>
+
+        } @else {
+
+          <!-- Engagement funnel -->
+          @if (funnelRows().length) {
+            <div class="adm-card" style="margin-bottom:16px;">
+              <div class="adm-card-head">
+                <div class="adm-card-title">Engagement funnel</div>
+                <span style="font-size:12px; color:var(--ink-400);">All-time, unique users</span>
+              </div>
+              <div class="adm-card-pad">
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                  @for (step of funnelRows(); track step.label) {
+                    <div>
+                      <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="font-size:13px; font-weight:600; color:var(--ink-700);">{{ step.label }}</span>
+                        <span style="font-size:13px; font-weight:700; font-feature-settings:'tnum';">
+                          {{ step.count | number }}
+                          <span style="color:var(--ink-400); font-weight:400; margin-left:6px;">{{ step.pct | number:'1.0-0' }}%</span>
+                        </span>
+                      </div>
+                      <div style="height:8px; background:var(--canvas); border-radius:4px; overflow:hidden;">
+                        <div [style.width.%]="step.pct" [style.background]="step.color" style="height:100%; border-radius:4px; transition:width .3s;"></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Cohort retention table -->
+          <div class="adm-card">
+            <div class="adm-card-head">
+              <div>
+                <div class="adm-card-title">Cohort retention — last 13 weeks</div>
+                <div style="font-size:12px; color:var(--ink-400); margin-top:2px;">% of users who returned on exactly D1, D7, D30 after signup</div>
+              </div>
+            </div>
+            <div class="adm-table-wrap">
+              <table class="adm-table">
+                <thead>
+                  <tr>
+                    <th>Cohort week</th>
+                    <th class="adm-text-right" style="width:72px;">Users</th>
+                    <th class="adm-text-right" style="width:88px;">D1</th>
+                    <th class="adm-text-right" style="width:88px;">D7</th>
+                    <th class="adm-text-right" style="width:88px;">D30</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (!retentionRows().length) {
+                    <tr><td colspan="5" class="adm-empty">No cohort data yet.</td></tr>
+                  }
+                  @for (row of retentionRows(); track row.cohort_week) {
+                    <tr>
+                      <td style="font-size:13px; font-weight:500;">{{ row.cohort_week | date:'MMM d, y' }}</td>
+                      <td class="adm-text-right adm-tabular" style="font-size:13px;">{{ row.cohort_size | number }}</td>
+                      <td class="adm-text-right adm-tabular">
+                        @if (row.d1Mature) {
+                          <span class="ret-pct" [class.ret-good]="row.d1Pct >= 20" [class.ret-ok]="row.d1Pct >= 10 && row.d1Pct < 20">
+                            {{ row.d1Pct | number:'1.0-0' }}%
+                          </span>
+                        } @else {
+                          <span class="adm-muted" style="font-size:12px;">—</span>
+                        }
+                      </td>
+                      <td class="adm-text-right adm-tabular">
+                        @if (row.d7Mature) {
+                          <span class="ret-pct" [class.ret-good]="row.d7Pct >= 10" [class.ret-ok]="row.d7Pct >= 5 && row.d7Pct < 10">
+                            {{ row.d7Pct | number:'1.0-0' }}%
+                          </span>
+                        } @else {
+                          <span class="adm-muted" style="font-size:12px;">—</span>
+                        }
+                      </td>
+                      <td class="adm-text-right adm-tabular">
+                        @if (row.d30Mature) {
+                          <span class="ret-pct" [class.ret-good]="row.d30Pct >= 5" [class.ret-ok]="row.d30Pct >= 2 && row.d30Pct < 5">
+                            {{ row.d30Pct | number:'1.0-0' }}%
+                          </span>
+                        } @else {
+                          <span class="adm-muted" style="font-size:12px;">—</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      }
+
       <!-- ════════════════════ EVENTS LOG TAB ════════════════════ -->
       @if (activeTab() === 'events') {
 
@@ -467,6 +567,19 @@ const EVENT_COLORS: Record<string, string> = {
     .id-filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .id-field { max-width: 200px; }
 
+    /* Retention table */
+    .ret-pct {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 12.5px;
+      font-weight: 700;
+      background: var(--canvas);
+      color: var(--ink-500);
+    }
+    .ret-pct.ret-ok   { background: #fff8e1; color: #e65100; }
+    .ret-pct.ret-good { background: var(--success-bg); color: var(--success); }
+
     /* Recipe title cell in events */
     .recipe-title-cell {
       max-width: 200px;
@@ -489,6 +602,11 @@ export class AnalyticsComponent implements OnInit {
   events = signal<AnalyticsEvent[]>([]);
   nextCursor = signal<string | null>(null);
   eventsLoading = signal(false);
+
+  retention = signal<AnalyticsRetentionResponse | null>(null);
+  retentionLoading = signal(false);
+  funnel = signal<AnalyticsFunnel | null>(null);
+  funnelLoading = signal(false);
 
   activeType = signal('all');
   recipeIdValue = '';
@@ -544,9 +662,45 @@ export class AnalyticsComponent implements OnInit {
     };
   });
 
+  retentionRows = computed(() => {
+    const cohorts = this.retention()?.cohorts ?? [];
+    const now = Date.now();
+    return cohorts.map(row => {
+      const weekMs = new Date(row.cohort_week).getTime();
+      const daysSince = (now - weekMs) / 86_400_000;
+      const d1Pct  = row.cohort_size > 0 ? (row.d1_count  / row.cohort_size) * 100 : 0;
+      const d7Pct  = row.cohort_size > 0 ? (row.d7_count  / row.cohort_size) * 100 : 0;
+      const d30Pct = row.cohort_size > 0 ? (row.d30_count / row.cohort_size) * 100 : 0;
+      return {
+        ...row,
+        d1Mature:  daysSince >= 2,
+        d7Mature:  daysSince >= 8,
+        d30Mature: daysSince >= 31,
+        d1Pct,
+        d7Pct,
+        d30Pct,
+      };
+    });
+  });
+
+  funnelRows = computed(() => {
+    const f = this.funnel();
+    if (!f || f.total_users === 0) return [];
+    const total = f.total_users;
+    return [
+      { label: '👤 Signed up',       count: total,       pct: 100,                             color: 'var(--ink-800)' },
+      { label: '👁 Viewed a recipe',  count: f.had_view,  pct: (f.had_view  / total) * 100,    color: 'var(--info)' },
+      { label: '❤️ Liked a recipe',   count: f.had_like,  pct: (f.had_like  / total) * 100,    color: '#D6336C' },
+      { label: '🔖 Saved a recipe',   count: f.had_save,  pct: (f.had_save  / total) * 100,    color: 'var(--violet)' },
+      { label: '👨‍🍳 Cooked a recipe', count: f.had_cook,  pct: (f.had_cook  / total) * 100,    color: 'var(--yummy-green)' },
+    ];
+  });
+
   ngOnInit() {
     this.loadStats();
     this.loadEvents();
+    this.loadRetention();
+    this.loadFunnel();
   }
 
   loadStats() {
@@ -573,6 +727,22 @@ export class AnalyticsComponent implements OnInit {
         this.eventsLoading.set(false);
       },
       error: () => this.eventsLoading.set(false),
+    });
+  }
+
+  loadRetention() {
+    this.retentionLoading.set(true);
+    this.api.getRetention().subscribe({
+      next: (res) => { this.retention.set(res); this.retentionLoading.set(false); },
+      error: () => this.retentionLoading.set(false),
+    });
+  }
+
+  loadFunnel() {
+    this.funnelLoading.set(true);
+    this.api.getFunnel().subscribe({
+      next: (res) => { this.funnel.set(res); this.funnelLoading.set(false); },
+      error: () => this.funnelLoading.set(false),
     });
   }
 

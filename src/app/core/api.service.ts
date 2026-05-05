@@ -3,6 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import {
   AnalyticsEventsResponse,
+  AnalyticsFunnel,
+  AnalyticsRetentionResponse,
   AnalyticsStats,
   BanRequest,
   HiddenCommentsResponse,
@@ -80,5 +82,13 @@ export class ApiService {
     if (params.recipe_id) p = p.set('recipe_id', params.recipe_id);
     if (params.user_id) p = p.set('user_id', params.user_id);
     return this.http.get<AnalyticsEventsResponse>(`${this.base}/analytics/events`, { params: p });
+  }
+
+  getRetention() {
+    return this.http.get<AnalyticsRetentionResponse>(`${this.base}/analytics/retention`);
+  }
+
+  getFunnel() {
+    return this.http.get<AnalyticsFunnel>(`${this.base}/analytics/funnel`);
   }
 }

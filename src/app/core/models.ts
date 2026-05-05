@@ -145,3 +145,23 @@ export interface AnalyticsEventsResponse {
   items: AnalyticsEvent[];
   next_cursor: string | null;
 }
+
+export interface AnalyticsRetentionCohort {
+  cohort_week: string;
+  cohort_size: number;
+  d1_count: number;
+  d7_count: number;
+  d30_count: number;
+}
+
+export interface AnalyticsRetentionResponse {
+  cohorts: AnalyticsRetentionCohort[];
+}
+
+export interface AnalyticsFunnel {
+  total_users: number;
+  had_view: number;
+  had_like: number;
+  had_save: number;
+  had_cook: number;
+}
