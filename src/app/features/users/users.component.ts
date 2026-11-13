@@ -1,9 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '../../core/api.service';
 import { AdminUser, BanRequest } from '../../core/models';
 import { BanDialogComponent } from './ban-dialog.component';
@@ -26,6 +27,7 @@ function initials(user: AdminUser): string {
     MatDialogModule,
     MatSnackBarModule,
     MatTooltipModule,
+    MatIconModule,
   ],
   template: `
     <div class="adm-page">
@@ -41,14 +43,30 @@ function initials(user: AdminUser): string {
         </div>
       </div>
 
-      <!-- ── Filter chips ── -->
-      <div class="adm-chips" style="margin-bottom:14px;">
-        @for (f of filters; track f.value) {
-          <button class="adm-chip" [class.active]="activeFilter() === f.value"
-                  (click)="setFilter(f.value)">
-            {{ f.label }}
-          </button>
-        }
+      <!-- ── Search + filter chips ── -->
+      <div class="toolbar">
+        <label class="search">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input class="search-input" type="search" autocomplete="off" spellcheck="false"
+                 placeholder="Search username, name or email"
+                 aria-label="Search users"
+                 [value]="query()"
+                 (input)="onQueryInput($any($event.target).value)"
+                 (keydown.escape)="clearQuery()" />
+          @if (query()) {
+            <button class="search-clear" type="button" (click)="clearQuery()" aria-label="Clear search">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </label>
+        <div class="adm-chips">
+          @for (f of filters; track f.value) {
+            <button class="adm-chip" [class.active]="activeFilter() === f.value"
+                    (click)="setFilter(f.value)">
+              {{ f.label }}
+            </button>
+          }
+        </div>
       </div>
 
       <!-- ── Table card ── -->
@@ -70,7 +88,9 @@ function initials(user: AdminUser): string {
               </thead>
               <tbody>
                 @if (users().length === 0) {
-                  <tr><td colspan="6" class="adm-empty">No users found.</td></tr>
+                  <tr><td colspan="6" class="adm-empty">
+                    @if (query()) { No users match “{{ query() }}”. } @else { No users found. }
+                  </td></tr>
                 }
                 @for (u of users(); track u.id) {
                   <tr>
@@ -136,12 +156,37 @@ function initials(user: AdminUser): string {
     </div>
   `,
   styles: [`
+    .toolbar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .search {
+      display: flex; align-items: center; gap: 8px;
+      flex: 1 1 260px; max-width: 380px;
+      background: var(--surface); border: 1px solid var(--border-strong);
+      border-radius: var(--r-md); padding: 7px 10px;
+      cursor: text;
+    }
+    .search:focus-within { border-color: var(--yummy-green); box-shadow: 0 0 0 3px var(--yummy-green-50); }
+    .search-icon { font-size: 18px !important; width: 18px !important; height: 18px !important; color: var(--ink-400); }
+    .search-input {
+      flex: 1; min-width: 0; border: none; outline: none; background: none;
+      font: 13px var(--font-admin); color: var(--ink-900);
+    }
+    .search-input::-webkit-search-cancel-button { display: none; }
+    .search-clear {
+      display: grid; place-items: center; border: none; background: none; cursor: pointer;
+      padding: 0; color: var(--ink-400); border-radius: 50%;
+    }
+    .search-clear:hover { color: var(--ink-900); }
+    .search-clear mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
     .violations-ok     { color: var(--ink-500); }
     .violations-warn   { color: var(--warn); }
     .violations-danger { color: var(--danger); }
   `],
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent implements OnInit, OnDestroy {
   filters: { label: string; value: BanFilter }[] = [
     { label: 'All',                value: 'all' },
     { label: 'Soft banned',        value: 'soft_banned' },
@@ -154,7 +199,11 @@ export class UsersComponent implements OnInit {
   loading = signal(false);
   actionLoading = signal(false);
   activeFilter = signal<BanFilter>('all');
+  query = signal('');
   limit = 20;
+
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+  private request = 0;
 
   constructor(
     private api: ApiService,
@@ -164,21 +213,43 @@ export class UsersComponent implements OnInit {
 
   ngOnInit() { this.load(); }
 
+  ngOnDestroy() { if (this.searchTimer) clearTimeout(this.searchTimer); }
+
+  /** Search as you type, 300 ms after the last keystroke. */
+  onQueryInput(value: string) {
+    this.query.set(value);
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.load(), 300);
+  }
+
+  clearQuery() {
+    if (!this.query()) return;
+    this.onQueryInput('');
+  }
+
   load() {
+    const request = ++this.request;
     this.users.set([]);
     this.nextCursor.set(null);
     this.loading.set(true);
-    this.api.getUsers({ limit: this.limit, filter: this.activeFilter() }).subscribe({
-      next: (res) => { this.users.set(res.users); this.nextCursor.set(res.next_cursor); this.loading.set(false); },
-      error: () => this.loading.set(false),
+    this.api.getUsers({ limit: this.limit, filter: this.activeFilter(), q: this.query().trim() }).subscribe({
+      next: (res) => {
+        if (request !== this.request) return;
+        this.users.set(res.users);
+        this.nextCursor.set(res.next_cursor);
+        this.loading.set(false);
+      },
+      error: () => { if (request === this.request) this.loading.set(false); },
     });
   }
 
   loadMore() {
     if (!this.nextCursor()) return;
+    const request = this.request;
     this.loading.set(true);
-    this.api.getUsers({ limit: this.limit, cursor: this.nextCursor()!, filter: this.activeFilter() }).subscribe({
+    this.api.getUsers({ limit: this.limit, cursor: this.nextCursor()!, filter: this.activeFilter(), q: this.query().trim() }).subscribe({
       next: (res) => {
+        if (request !== this.request) return;
         this.users.update(prev => [...prev, ...res.users]);
         this.nextCursor.set(res.next_cursor);
         this.loading.set(false);

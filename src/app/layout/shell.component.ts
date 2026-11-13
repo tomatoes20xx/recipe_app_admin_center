@@ -379,7 +379,8 @@ import { AuthService } from '../core/auth.service';
       height: 64px;
       background: var(--surface);
       border-top: 1px solid var(--border);
-      grid-template-columns: repeat(5, 1fr);
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
       z-index: 30;
     }
     @media (max-width: 768px) {
@@ -414,9 +415,8 @@ export class ShellComponent {
 
   navItems = [
     { id: 'overview',   label: 'Overview',   icon: 'dashboard', path: '/admin/overview' },
-    { id: 'reports',    label: 'Reports',    icon: 'flag',      path: '/admin/reports' },
+    { id: 'moderation', label: 'Moderation', icon: 'flag',      path: '/admin/moderation' },
     { id: 'users',      label: 'Users',      icon: 'people',    path: '/admin/users' },
-    { id: 'content',    label: 'Content',    icon: 'layers',    path: '/admin/content' },
     { id: 'analytics',  label: 'Analytics',  icon: 'insights',  path: '/admin/analytics' },
   ];
 

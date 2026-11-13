@@ -30,22 +30,19 @@ export const routes: Routes = [
               import('./features/overview/overview.component').then((m) => m.OverviewComponent),
           },
           {
-            path: 'reports',
-            title: 'Reports · Yummy Admin',
+            path: 'moderation',
+            title: 'Moderation · Yummy Admin',
             loadComponent: () =>
-              import('./features/reports/reports.component').then((m) => m.ReportsComponent),
+              import('./features/moderation/moderation.component').then((m) => m.ModerationComponent),
           },
+          // Reports and Content were merged into Moderation.
+          { path: 'reports', redirectTo: 'moderation', pathMatch: 'full' },
+          { path: 'content', redirectTo: 'moderation', pathMatch: 'full' },
           {
             path: 'users',
             title: 'Users · Yummy Admin',
             loadComponent: () =>
               import('./features/users/users.component').then((m) => m.UsersComponent),
-          },
-          {
-            path: 'content',
-            title: 'Content · Yummy Admin',
-            loadComponent: () =>
-              import('./features/content/content.component').then((m) => m.ContentComponent),
           },
           {
             path: 'analytics',

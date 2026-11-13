@@ -4,24 +4,6 @@ export interface LoginResponse {
   is_admin: boolean;
 }
 
-// ── Reports ─────────────────────────────────────────────────────────────────
-export type ReportTargetType = 'recipe' | 'comment' | 'user';
-
-export interface Report {
-  id: string;
-  target_type: ReportTargetType;
-  target_id: string;
-  reason: string;
-  created_at: string;
-  reporter_username: string;
-  target_detail: string | null;
-}
-
-export interface ReportsResponse {
-  reports: Report[];
-  next_cursor: string | null;
-}
-
 // ── Users ────────────────────────────────────────────────────────────────────
 export interface AdminUser {
   id: string;
@@ -47,38 +29,72 @@ export interface UsersResponse {
   next_cursor: string | null;
 }
 
-// ── Content ──────────────────────────────────────────────────────────────────
-export interface HiddenRecipe {
+// ── Moderation ───────────────────────────────────────────────────────────────
+export type ModTarget = 'recipe' | 'comment' | 'user';
+export type ModStatusFilter = 'needs_review' | 'hidden' | 'all';
+export type ModAction = 'dismiss' | 'hide' | 'restore' | 'keep_hidden' | 'ban';
+
+/**
+ * Current state of the reported thing:
+ * recipe  → visible | hidden | deleted (by its author)
+ * comment → visible | flagged (collapsed in the app) | removed
+ * user    → active | soft_banned | banned
+ * any     → missing (no longer in the database)
+ */
+export type ModItemStatus =
+  | 'visible' | 'hidden' | 'deleted'
+  | 'flagged' | 'removed'
+  | 'active' | 'soft_banned' | 'banned'
+  | 'missing';
+
+export interface ModReport {
   id: string;
-  title: string;
-  description: string;
-  report_count: number;
+  reason: string;
+  reporter_username: string | null;
   created_at: string;
-  author_id: string;
-  author_username: string;
-  author_display_name: string;
+  resolved_at: string | null;
+  resolution: ModAction | null;
 }
 
-export interface HiddenRecipesResponse {
-  recipes: HiddenRecipe[];
+export interface ModItem {
+  target_type: ModTarget;
+  target_id: string;
+  status: ModItemStatus;
+  open_reports: number;
+  total_reports: number;
+  last_activity_at: string;
+  reasons: { label: string; count: number }[];
+  reports: ModReport[];
+  recipe: { title: string | null } | null;
+  comment: { body: string | null; recipe_id: string | null; recipe_title: string | null } | null;
+  user: { email: string | null; ban_reason: string | null } | null;
+  /** Recipe/comment author, or the reported user themselves. */
+  author: {
+    id: string;
+    username: string | null;
+    display_name: string | null;
+    is_active: boolean;
+    soft_banned_until: string | null;
+  } | null;
+}
+
+export type ModCounts = Record<ModTarget, { needs_review: number; hidden: number; all: number }>;
+
+export interface ModerationResponse {
+  items: ModItem[];
   next_cursor: string | null;
+  counts: ModCounts;
 }
 
-export interface HiddenComment {
-  id: string;
-  content: string;
-  author_username: string;
-  recipe_id: string;
-  report_count: number;
-  created_at: string;
+export interface ModActionResponse {
+  item: ModItem | null;
+  counts: ModCounts;
 }
 
-export interface HiddenCommentsResponse {
-  comments: HiddenComment[];
-  next_cursor: string | null;
-}
+// ── Analytics ────────────────────────────────────────────────────────────────
+export type StatsRange = 'today' | '7d' | '30d' | '90d' | 'all';
+export type StatsBucket = 'hour' | 'day' | 'week' | 'month';
 
-// ── Analytics ─────────────────────────────────────────────────────────────────
 export interface AnalyticsOverall {
   total_events: number;
   unique_users: number;
@@ -88,11 +104,19 @@ export interface AnalyticsOverall {
   events_last_30d: number;
 }
 
+export interface AnalyticsPeriod {
+  events: number;
+  active_users: number;
+  recipes: number;
+  signups: number;
+}
+
 export interface AnalyticsByType {
   event_type: string;
   total: number;
   last_24h: number;
   last_7d: number;
+  in_range: number;
 }
 
 export interface AnalyticsTopRecipe {
@@ -107,13 +131,10 @@ export interface AnalyticsTopRecipe {
   cooks?: number;
 }
 
-export interface AnalyticsDailyBreakdown {
-  date: string;
-  total: number;
-  views: number;
-  likes: number;
-  bookmarks: number;
-  comments: number;
+/** One chart column: `start` is the bucket's local start time (`YYYY-MM-DDTHH:mm`). */
+export interface AnalyticsSeriesPoint {
+  start: string;
+  counts: Record<string, number>;
 }
 
 export interface AnalyticsPlatforms {
@@ -123,10 +144,12 @@ export interface AnalyticsPlatforms {
 }
 
 export interface AnalyticsStats {
+  range: { key: StatsRange; bucket: StatsBucket; tz: string; start: string };
+  period: AnalyticsPeriod;
+  series: AnalyticsSeriesPoint[];
   overall: AnalyticsOverall;
   by_type: AnalyticsByType[];
   top_recipes: AnalyticsTopRecipe[];
-  daily_events: AnalyticsDailyBreakdown[];
   platforms: AnalyticsPlatforms;
 }
 
@@ -138,7 +161,7 @@ export interface AnalyticsEvent {
   recipe_id: string | null;
   recipe_title: string | null;
   created_at: string;
-  metadata: string | null;
+  metadata: Record<string, unknown> | string | null;
 }
 
 export interface AnalyticsEventsResponse {
@@ -146,16 +169,21 @@ export interface AnalyticsEventsResponse {
   next_cursor: string | null;
 }
 
-export interface AnalyticsRetentionCohort {
-  cohort_week: string;
-  cohort_size: number;
-  d1_count: number;
-  d7_count: number;
-  d30_count: number;
+export interface CohortCell {
+  /** Users in the cohort whose period has fully passed. */
+  eligible: number;
+  /** Of those, how many did anything in the app during the period. */
+  retained: number;
 }
 
-export interface AnalyticsRetentionResponse {
-  cohorts: AnalyticsRetentionCohort[];
+export interface CohortsResponse {
+  group: 'week' | 'month';
+  count: number;
+  tz: string;
+  /** Number of period columns (Week 1…N / Month 1…N). */
+  periods: number;
+  cohorts: { cohort_start: string; size: number; cells: CohortCell[] }[];
+  average: CohortCell[];
 }
 
 export interface AnalyticsFunnel {

@@ -4,15 +4,18 @@ import { environment } from '../../environments/environment';
 import {
   AnalyticsEventsResponse,
   AnalyticsFunnel,
-  AnalyticsRetentionResponse,
   AnalyticsStats,
   BanRequest,
-  HiddenCommentsResponse,
-  HiddenRecipesResponse,
-  ReportTargetType,
-  ReportsResponse,
+  CohortsResponse,
+  ModAction,
+  ModActionResponse,
+  ModerationResponse,
+  ModStatusFilter,
+  ModTarget,
+  StatsRange,
   UsersResponse,
 } from './models';
+import { browserTimezone } from './events';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -20,21 +23,32 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  // ── Reports ────────────────────────────────────────────────────────────────
+  // ── Moderation ─────────────────────────────────────────────────────────────
 
-  getReports(params: { limit?: number; cursor?: string; type?: ReportTargetType | 'all' }) {
+  getModeration(params: { limit?: number; cursor?: string; type?: ModTarget | 'all'; status?: ModStatusFilter }) {
     let p = new HttpParams().set('limit', params.limit ?? 20);
     if (params.cursor) p = p.set('cursor', params.cursor);
-    if (params.type && params.type !== 'all') p = p.set('target_type', params.type);
-    return this.http.get<ReportsResponse>(`${this.base}/reports`, { params: p });
+    if (params.type) p = p.set('type', params.type);
+    if (params.status) p = p.set('status', params.status);
+    return this.http.get<ModerationResponse>(`${this.base}/moderation`, { params: p });
+  }
+
+  moderate(type: ModTarget, id: string, action: ModAction, ban?: BanRequest) {
+    return this.http.post<ModActionResponse>(`${this.base}/moderation/${type}/${id}`, { action, ban });
   }
 
   // ── Users ──────────────────────────────────────────────────────────────────
 
-  getUsers(params: { limit?: number; cursor?: string; filter?: 'all' | 'soft_banned' | 'permanently_banned' | 'has_violations' }) {
+  getUsers(params: {
+    limit?: number;
+    cursor?: string;
+    filter?: 'all' | 'soft_banned' | 'permanently_banned' | 'has_violations';
+    q?: string;
+  }) {
     let p = new HttpParams().set('limit', params.limit ?? 20);
     if (params.cursor) p = p.set('cursor', params.cursor);
     if (params.filter && params.filter !== 'all') p = p.set('filter', params.filter);
+    if (params.q) p = p.set('q', params.q);
     return this.http.get<UsersResponse>(`${this.base}/users`, { params: p });
   }
 
@@ -46,33 +60,11 @@ export class ApiService {
     return this.http.post<void>(`${this.base}/users/${userId}/unban`, {});
   }
 
-  // ── Content ────────────────────────────────────────────────────────────────
-
-  getHiddenRecipes(params: { limit?: number; cursor?: string }) {
-    let p = new HttpParams().set('limit', params.limit ?? 20);
-    if (params.cursor) p = p.set('cursor', params.cursor);
-    return this.http.get<HiddenRecipesResponse>(`${this.base}/recipes/hidden`, { params: p });
-  }
-
-  restoreRecipe(recipeId: string) {
-    return this.http.post<void>(`${this.base}/recipes/${recipeId}/restore`, {});
-  }
-
-  getHiddenComments(params: { limit?: number; cursor?: string; filter?: 'all' | 'reported' | 'flagged_only' | 'deleted_only' }) {
-    let p = new HttpParams().set('limit', params.limit ?? 20);
-    if (params.cursor) p = p.set('cursor', params.cursor);
-    if (params.filter) p = p.set('filter', params.filter);
-    return this.http.get<HiddenCommentsResponse>(`${this.base}/comments/flagged`, { params: p });
-  }
-
-  restoreComment(commentId: string) {
-    return this.http.post<void>(`${this.base}/comments/${commentId}/restore`, {});
-  }
-
   // ── Analytics ───────────────────────────────────────────────────────────────
 
-  getAnalyticsStats() {
-    return this.http.get<AnalyticsStats>(`${this.base}/analytics/stats`);
+  getAnalyticsStats(range: StatsRange = '30d') {
+    const p = new HttpParams().set('range', range).set('tz', browserTimezone());
+    return this.http.get<AnalyticsStats>(`${this.base}/analytics/stats`, { params: p });
   }
 
   getAnalyticsEvents(params: { limit?: number; cursor?: string; event_type?: string; recipe_id?: string; user_id?: string }) {
@@ -84,8 +76,9 @@ export class ApiService {
     return this.http.get<AnalyticsEventsResponse>(`${this.base}/analytics/events`, { params: p });
   }
 
-  getRetention() {
-    return this.http.get<AnalyticsRetentionResponse>(`${this.base}/analytics/retention`);
+  getCohorts(group: 'week' | 'month', count: number) {
+    const p = new HttpParams().set('group', group).set('count', count).set('tz', browserTimezone());
+    return this.http.get<CohortsResponse>(`${this.base}/analytics/cohorts`, { params: p });
   }
 
   getFunnel() {
