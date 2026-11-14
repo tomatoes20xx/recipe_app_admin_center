@@ -5,12 +5,12 @@ import { LoginComponent } from './pages/login/login.component';
 import { LandingComponent } from './features/landing/landing.component';
 
 export const routes: Routes = [
-  { path: '', component: LandingComponent, title: 'Yummy' },
+  { path: '', component: LandingComponent, title: 'Yummy — შენი ჯიბის სამზარეულო' },
   {
     path: 'download',
-    title: 'Coming Soon · Yummy',
+    title: 'ჩამოტვირთე Yummy',
     loadComponent: () =>
-      import('./features/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
+      import('./features/download/download.component').then((m) => m.DownloadComponent),
   },
   {
     path: 'admin',

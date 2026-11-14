@@ -141,6 +141,14 @@ export const CMS = {
     qrNote: 'ან დაასკანერე ტელეფონით',
   },
 
+  // yummy.ge/download: phones are sent straight to their store, so desktops see this.
+  downloadPage: {
+    title: 'ჩამოტვირთე Yummy',
+    sub: 'უფასოა iPhone-სა და Android-ზე.',
+    qrNote: 'დაასკანერე ტელეფონით',
+    back: '← yummy.ge',
+  },
+
   footer: {
     name: 'Yummy',
     line: '© 2026 Yummy · თბილისი, საქართველო · v 1.5.0',
