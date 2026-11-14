@@ -13,6 +13,27 @@ export const routes: Routes = [
       import('./features/download/download.component').then((m) => m.DownloadComponent),
   },
   {
+    path: 'privacy',
+    title: 'Privacy Policy · Yummy',
+    data: { doc: 'privacy' },
+    loadComponent: () =>
+      import('./features/legal/legal-page.component').then((m) => m.LegalPageComponent),
+  },
+  {
+    path: 'terms',
+    title: 'მომსახურების წესები · Yummy',
+    data: { doc: 'terms' },
+    loadComponent: () =>
+      import('./features/legal/legal-page.component').then((m) => m.LegalPageComponent),
+  },
+  {
+    path: 'delete-account',
+    title: 'ანგარიშის წაშლა · Yummy',
+    data: { doc: 'delete' },
+    loadComponent: () =>
+      import('./features/legal/legal-page.component').then((m) => m.LegalPageComponent),
+  },
+  {
     path: 'admin',
     children: [
       { path: 'login', component: LoginComponent, title: 'Yummy Admin' },

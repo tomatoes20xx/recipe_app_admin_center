@@ -487,6 +487,24 @@ button:focus-visible {
   }
 }
 
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 20px;
+
+  a {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--ink-2);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--green-deep);
+    text-decoration: underline;
+  }
+}
+
 .footer-logo {
   display: flex;
   align-items: center;

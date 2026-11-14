@@ -249,6 +249,15 @@
       <img src="/app_icon_web.png" alt="" width="28" height="28" loading="lazy" />
       <span>{{ cms.footer.name }}</span>
     </a>
+    <nav class="footer-links" aria-label="Yummy">
+      @for (link of cms.footer.links; track link.href) {
+        @if (link.external) {
+          <a [href]="link.href" target="_blank" rel="noopener">{{ link.label }}</a>
+        } @else {
+          <a [routerLink]="link.href">{{ link.label }}</a>
+        }
+      }
+    </nav>
     <p>{{ cms.footer.line }}</p>
   </footer>
 </div>

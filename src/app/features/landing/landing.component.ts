@@ -6,12 +6,13 @@ import {
   signal,
   viewChildren,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CMS } from './landing.component.cms';
 import { DeviceFrameComponent } from './device-frame.component';
 
 @Component({
   selector: 'app-landing',
-  imports: [DeviceFrameComponent],
+  imports: [DeviceFrameComponent, RouterLink],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

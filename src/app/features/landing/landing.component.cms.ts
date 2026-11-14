@@ -125,7 +125,7 @@ export const CMS = {
       },
       {
         q: 'შემიძლია სიის ან რეცეპტის გაზიარება?',
-        a: 'დიახ. რეცეპტი ან საყიდლების სია ერთი შეხებით გაუზიარე ოჯახს ან მეგობრებს — იშოპინგეთ და მოამზადეთ ერთად.',
+        a: 'დიახ. რეცეპტი ან საყიდლების სია ერთი შეხებით გაუზიარე ოჯახს ან მეგობრებს — იყიდეთ და მოამზადეთ ერთად.',
       },
       {
         q: 'შემიძლია საკუთარი რეცეპტის დამატება?',
@@ -152,5 +152,12 @@ export const CMS = {
   footer: {
     name: 'Yummy',
     line: '© 2026 Yummy · თბილისი, საქართველო · v 1.5.0',
+    links: [
+      { label: 'Facebook', href: 'https://www.facebook.com/yummypocketkitchen', external: true },
+      { label: 'Instagram', href: 'https://www.instagram.com/yummypocketkitchen/', external: true },
+      { label: 'yummyhelper@gmail.com', href: 'mailto:yummyhelper@gmail.com', external: true },
+      { label: 'კონფიდენციალურობა', href: '/privacy', external: false },
+      { label: 'წესები', href: '/terms', external: false },
+    ],
   },
 } as const;
